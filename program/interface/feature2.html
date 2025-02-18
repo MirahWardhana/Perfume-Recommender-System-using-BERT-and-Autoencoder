@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <title>Customize Notes and Description</title>
+
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="styles.css">
+
+  </head>
+
+  <body class="no-scrollbar">
+    <div style="display: flex; justify-content:center; margin-top:1rem">
+        <h2>Input</h2>
+    </div>
+    <div class="row align-items-center">
+        <div class="col-12 col-md-6">
+            <div class="row" style="display: flex; justify-content: center; align-items: center;">
+                <div class="col-sm-12 d-flex align-items-center m-2" style="display: flex; justify-content: center; align-items: center;">
+                    <input class="m-1 search-input" type="search" placeholder="Enter a description" />
+                    <button type="button" class="btn btn-dark">Search</button>
+                </div>
+                <div class="col-sm-12 mb-5" style="max-width:100vh; height:80vh; overflow-y:scroll;" id="scroll-style">
+                    <div class="row g-0 grid-row">
+
+                        <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="scrollToInsight()" >
+                            <div class="flip-card-inner">
+                                <!-- Front -->
+                                <div class="flip-card-front">
+                                    <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                                    <div class="card-body">
+                                        <h5 class="card-title">Card title Card title Card title</h5>
+                                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                    </div>
+                                </div>
+            
+                            </div>
+                        </div>
+                        
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-12 col-md-6" id="insightDiv">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-4" style="height:50vh; display: flex; align-items: center; justify-content: center;">
+                    <img src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" alt="" style="width: 30vh;">
+                </div>
+                <div class="col-12 col-md-8" style="height:40vh; display:flex; align-items: center;" >
+                    <div class="table-wrapper container mt-2 table-container" id="scroll-style" style="width:100%;">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td>floral</td>
+                                    <td class="slider-container">
+                                        <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="100" 
+                                            value="50" 
+                                            class="form-range custom-slider" 
+                                            id="slider1" 
+                                            oninput="updateSlider(1)">
+                                        <span id="sliderPercentage1" class="slider-percentage">50%</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>green</td>
+                                    <td class="slider-container">
+                                        <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="100" 
+                                            value="75" 
+                                            class="form-range custom-slider" 
+                                            id="slider2" 
+                                            oninput="updateSlider(2)">
+                                        <span id="sliderPercentage2" class="slider-percentage">75%</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>musky</td>
+                                    <td class="slider-container">
+                                        <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="100" 
+                                            value="60" 
+                                            class="form-range custom-slider" 
+                                            id="slider3" 
+                                            oninput="updateSlider(3)">
+                                        <span id="sliderPercentage3" class="slider-percentage">60%</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                  <td>woody</td>
+                                  <td class="slider-container">
+                                      <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="100" 
+                                            value="25" 
+                                            class="form-range custom-slider" 
+                                            id="slider4" 
+                                            oninput="updateSlider(4)">
+                                        <span id="sliderPercentage4" class="slider-percentage">25%</span>
+                                  </td>
+                              </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-12" style="height:40vh; display:grid; align-items:center; justify-content:center;">
+                <table class="table">
+                    <tbody>
+                      <tr>
+                        <td>Name</td>
+                        <td>Otto</td>
+                      </tr>
+                      <tr>
+                        <td>Brand</td>
+                        <td>Thornton</td>
+                      </tr>
+                      <tr>
+                        <td>Gender</td>
+                        <td>the Bird</td>
+                      </tr>
+                      <tr>
+                        <td>Rating</td>
+                        <td>the Bird</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <button class="btn btn-dark shiny-button m-1 get-recommendations-button" onclick="scrollToTarget()" type="submit">Get Recommendations</button>
+
+            </div>
+
+        </div>
+    </div>
+
+        <!-- Hasil -->
+    <div id="targetDiv" class="result-section">
+        <!-- Bagian Judul -->
+        <div class="col-12">
+            <h2 class="mt-5 mb-3">Result</h2>
+        </div>
+
+        <!-- Bagian Grid -->
+        <div class="container mt-4 mb-4 result-grid" id="scroll-style">
+            <div class="row g-0 grid-row">
+
+            <!-- Card -->
+            <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+    <script>
+        // Mengonversi nilai menjadi kode warna heksadesimal
+        function intToHex(value) {
+            var hex = value.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+
+        // Membuat warna berdasarkan nilai persentase
+        function makeColor(value) {
+            value = Math.min(Math.max(0, value), 100);
+            var redValue = 255 - Math.round(value * 2.55);
+            var greenValue = Math.round(value * 2.55);
+            return "#" + intToHex(redValue) + intToHex(greenValue) + "00";
+        }
+
+        // Memperbarui nilai dan warna slider secara dinamis
+        function updateSlider(id) {
+            const slider = document.getElementById(`slider${id}`);
+            const percentage = document.getElementById(`sliderPercentage${id}`);
+            const color = makeColor(slider.value);
+
+            percentage.textContent = slider.value + "%"; // Memperbarui teks
+            slider.style.background = `linear-gradient(to right, ${color} ${slider.value}%, #ddd ${slider.value}%)`; // Warna latar slider
+        }
+
+        // Inisialisasi warna slider saat memuat halaman
+        document.querySelectorAll(".custom-slider").forEach((slider, index) => {
+            updateSlider(index + 1);
+        });
+
+        function scrollToInsight() {
+            document.getElementById("insightDiv").scrollIntoView({ behavior: "smooth" });
+        }
+
+        function scrollToTarget() {
+          document.getElementById("targetDiv").scrollIntoView({ behavior: "smooth" });
+        }
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+
+</html>

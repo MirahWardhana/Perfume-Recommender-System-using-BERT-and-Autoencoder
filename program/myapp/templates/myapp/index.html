@@ -1,0 +1,352 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fragrantica Recommendations</title>
+
+  <!--
+    - custom css link 
+  -->
+  <!-- Bootstrap CSS -->
+  {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> {% endcomment %}
+
+  <link rel="stylesheet" href="{% static 'myapp/assets/css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'myapp/assets/css/recommendation.css' %}">
+  <link rel="stylesheet" href="{% static 'myapp/assets/css/media_query.css' %}">
+
+
+  <!--
+    - google font link
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Monoton&family=Rubik:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+
+</head>
+
+<body>
+
+  <!--
+    - main container
+  -->
+
+  <div class="container">
+
+    <!--
+      - #HEADER
+    -->
+
+    <header>
+
+      <nav class="navbar">
+
+        <div class="navbar-wrapper">
+
+          <a href="https://www.fragrantica.com/">
+            <img src="https://www.fragrantica.com/ndimg/fragrantica-logo-tagline-svg.svg" alt="logo" width="250">
+          </a>
+          <div style="width:50px;"></div>
+
+          <ul class="navbar-nav">
+
+            <li>
+              <a href="#home" class="nav-link">Home</a>
+            </li>
+
+            <li>
+              <a href="#about" class="nav-link">About</a>
+            </li>
+
+            <li>
+              <a href="#recommendation1" class="nav-link">Find Recommendations </a>
+            </li>
+
+
+
+          </ul>
+
+
+        </div>
+
+      </nav>
+
+
+
+    </header>
+
+
+    <main>
+
+      <!--
+        - #HOME SECTION
+      -->
+
+      <section class="home" id="home">
+
+        <div class="home-left">
+
+          <p class="home-subtext">Find Your Perfect Fragrance Today</p>
+
+          <h1 class="main-heading">Discover Your Signature Scent</h1>
+
+          <p class="home-text">
+            Looking for the perfect fragrance that speaks to your personality? With our Fragrance Recommendation System, you can effortlessly find the scent that matches your lifestyle, preferences, and mood. In just a few steps, we’ll guide you to your new favorite fragrance, tailored uniquely to you.
+          </p>
+
+          <div class="btn-group">
+
+            <button class="btn btn-primary btn-icon">
+              <img  src="{% static 'myapp/assets/images/menu.svg' %}" alt="menu icon">
+              Find Recommendations
+            </button>
+
+            <button class="btn btn-secondary btn-icon">
+              <img  src="{% static 'myapp/assets/images/arrow.svg' %}" alt="menu icon">
+              About us
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="home-right">
+
+          <img src="https://fimgs.net/mdimg/perfume/375x500.23280.jpg" alt="perfume image" class="food-img food-1" width="200" loading="lazy" style="width: 250px;">
+          <img src="https://fimgs.net/mdimg/perfume/375x500.8766.jpg" alt="perfume image" class="food-img food-2" width="200" loading="lazy" style="width: 200px;">
+          <img src="https://fimgs.net/mdimg/perfume/375x500.611.jpg" alt="perfume image" class="food-img food-3" width="200" loading="lazy" style="width: 200px;">
+
+          <!-- <img  src="{% static 'myapp/assets/images/dialog-1.svg' %}" alt="dialog" class="dialog dialog-1" width="230">
+          <img  src="{% static 'myapp/assets/images/dialog-2.svg' %}" alt="dialog" class="dialog dialog-2" width="230"> -->
+
+          <img src="https://fimgs.net/mdimg/perfume/375x500.96428.jpg" alt="circle shape" class="shape shape-1" width="25">
+          <img src="https://fimgs.net/mdimg/perfume/375x500.707.jpg" alt="circle shape" class="shape shape-2" width="15">
+          <img src="https://fimgs.net/mdimg/perfume/375x500.631.jpg" alt="circle shape" class="shape shape-3" width="30">
+          <img src="https://fimgs.net/mdimg/perfume/375x500.31861.jpg" alt="ring shape" class="shape shape-4" width="60">
+          <img src="https://fimgs.net/mdimg/perfume/375x500.51016.jpg" alt="ring shape" class="shape shape-5" width="40">
+
+        </div>
+
+      </section>
+
+
+
+
+
+      <!--
+        - #ABOUT SECTION
+      -->
+
+      <section class="about" id="about">
+
+        <div class="about-left">
+
+          <div class="img-box">
+            <img  src="https://troveexperiences.com/cdn/shop/files/Perfume-05_a14f1bf2-342a-4dc0-a48a-68b5be704e39_1800x1800.jpg?v=1718692613" alt="about image" class="about-img" width="250">
+          </div>
+
+          <div class="abs-content-box">
+            <div class="dotted-border">
+              <p class="number-lg">1</p>
+              <p class="text-md">Years <br> Experiense</p>
+            </div>
+          </div>
+
+          <img  src="{% static 'myapp/assets/images/circle.svg' %}" alt="circle shape" class="shape shape-6" width="20">
+          <img  src="{% static 'myapp/assets/images/circle.svg' %}" alt="circle shape" class="shape shape-7" width="30">
+          <img  src="{% static 'myapp/assets/images/ring.svg' %}" alt="ring shape" class="shape shape-8" width="35">
+          <img  src="{% static 'myapp/assets/images/ring.svg' %}" alt="ring shape" class="shape shape-9" width="80">
+
+        </div>
+
+        <div class="about-right">
+
+          <h2 class="section-title">We are doing more than
+            you expect</h2>
+
+          <p class="section-text">
+            In the modern era, perfume is more than a fragrance—it’s a means of expressing identity and personality. A chosen scent often reflects character, mood, or cultural values, becoming an essential part of daily life. Perfumes consist of three layers—top, middle, and base notes—that gradually unfold after application.
+
+          </p>
+
+          <p class="section-text">
+            With countless options available, finding the right perfume can be challenging. Note-based recommendation systems simplify this process by using data on a user’s preferences to suggest suitable scents. These systems save time, encourage exploration of new aromas, and meet the growing demand for personalized fragrance experiences.
+
+          </p>
+
+          <img  src="{% static 'myapp/assets/images/signature.png' %}" alt="signature" class="signature" width="150">
+
+        </div>
+
+      </section>
+
+
+
+
+
+      <!--
+        - #RECOMMENDATION1 SECTION
+      -->
+
+      <section class="recommendation1 justify-content-center align-items-center" id="recommendation1" style="margin-top:5vh; margin-left: 40vh; margin-right: 40vh;">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6 col-sm-12 justify-content-center align-items-center" >
+              
+              <div class="container">
+                <h2 class="section-title" style="margin-bottom: 3vh;">Find Perfume Recommendation from Notes Selection and Description</h2>
+                
+              <p class="section-text" style="margin-bottom: 3vh;" >Input your preferred fragrance notes and a brief description of the scent you’re looking for. Our system will analyze your input and generate perfume suggestions based on percentage note compositions.</p>
+                <button class="btn btn-primary btn-icon">
+                  Show Recommendations
+                </button>
+              </div>
+
+            </div>
+            <div class="col-md-6 col-sm-12" style="height:80vh; display: flex; flex-direction: column; align-items: flex-end; justify-content: center;">
+              <div>
+                <h2 class="section-title" style="text-align: right; margin-bottom: 3vh;">Find Perfume Recommendation from Product Selection</h2>
+              </div>
+              <p class="section-text" style="text-align: right; margin-bottom: 3vh;" >Browse our collection of available perfumes, select a product that catches your interest, and let our platform recommend similar or complementary fragrances.</p>
+              <button class="btn btn-primary btn-icon">
+                Show Recommendations
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+
+
+
+
+
+
+      <!--
+        - #RECOMMENDATION2 SECTION
+      -->
+{% comment %} 
+      <section class="recommendation2" id="recommendation2">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12 col-sm-12">
+              <div class="table-wrapper container mt-2">
+                <table class="table">
+                  <tbody>
+                    <tr>
+                      <td>floral</td>
+                      <td class="slider-container">
+                          <input 
+                              type="range" 
+                              min="0" 
+                              max="100" 
+                              value="50" 
+                              class="form-range custom-slider" 
+                              id="slider1" 
+                              oninput="updateSlider(1)">
+                          <span id="sliderPercentage1" class="slider-percentage">50%</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>citrus</td>
+                      <td class="slider-container">
+                          <input 
+                              type="range" 
+                              min="0" 
+                              max="100" 
+                              value="75" 
+                              class="form-range custom-slider" 
+                              id="slider2" 
+                              oninput="updateSlider(2)">
+                          <span id="sliderPercentage2" class="slider-percentage">75%</span>
+                      </td>
+                    </tr>
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="col-md-12 col-sm-12" style="background:orange;">
+              2 of 2
+            </div>
+          </div>
+        </div>
+      </section> {% endcomment %}
+
+    </main>
+
+
+
+
+
+    <!--
+      - #FOOTER
+    -->
+
+    <footer>
+
+      <div class="footer-wrapper">
+
+        <a href="#">
+          <img src="https://www.fragrantica.com/ndimg/fragrantica-logo-tagline-svg.svg" alt="logo" class="footer-brand" width="130">
+        </a>
+
+        <div class="social-link">
+
+          <a href="#">
+            <ion-icon name="logo-twitter"></ion-icon>
+          </a>
+
+          <a href="#">
+            <ion-icon name="logo-instagram"></ion-icon>
+          </a>
+
+          <a href="#">
+            <ion-icon name="logo-facebook"></ion-icon>
+          </a>
+
+          <a href="#">
+            <ion-icon name="logo-youtube"></ion-icon>
+          </a>
+
+        </div>
+
+        <p class="copyright">&copy; Copyright 2024 Mirah Wardhana. All Rights Reserved.</p>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+
+
+
+
+  <!--
+    - custom js link
+  -->
+  <script src="{% static "myapp/assets/js/script.js" %}"></script>
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+  <!--
+    - ionicon link
+  -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+</body>
+
+</html>

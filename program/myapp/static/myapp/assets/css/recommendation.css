@@ -1,0 +1,102 @@
+/*-----------------------------------*\ 
+  #RECOMMENDATION1
+\*-----------------------------------*/
+
+
+
+
+/*-----------------------------------*\ 
+  #RECOMMENDATION2
+\*-----------------------------------*/
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.slider-percentage {
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+}
+
+.custom-slider {
+    width: 80%;
+}
+
+.custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Remove default styling */
+    appearance: none; /* For Firefox */
+    width: 0; /* Hide the thumb */
+    height: 0; /* Hide the thumb */
+}
+
+.custom-slider::-moz-range-thumb {
+    width: 0; /* Hide the thumb */
+    height: 0; /* Hide the thumb */
+}
+
+.custom-slider::-webkit-slider-runnable-track {
+    height: 0px; /* Atur tinggi track */
+}
+
+
+.table-wrapper {
+    max-height: 200px; /* Batas tinggi untuk membuat scrollbar */
+    overflow-y: scroll; /* Scroll secara vertikal */
+    border: 1px solid #ddd; /* Tambahkan border untuk tabel */
+    width: 80%; /* Atur lebar wrapper */
+    margin: 0 auto; /* Tengah-kan wrapper */
+}
+
+table {
+    width: 100%; /* Lebar tabel mengikuti pembungkus */
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+
+th {
+    color: #1c1c1c;
+    background-color: white; /* Solid background for the header */
+    position: sticky; /* Make header sticky */
+    top: 0; /* Stick to the top of the table */
+    z-index: 1; /* Ensure it sits above other content */
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1); /* Optional shadow for visibility */
+}
+
+/* Additional styles for the table */
+.table-wrapper {
+    max-height: 200px; /* Set a maximum height for the wrapper */
+    overflow-y: scroll; /* Enable vertical scrolling */
+    border: 1px solid #ddd; /* Border for the table */
+    width: 80%; /* Width of the table wrapper */
+    margin: 0 auto; /* Center the wrapper */
+}
+
+table {
+    width: 100%; /* Full width of the table */
+    border-collapse: collapse; /* Collapse borders */
+}
+
+th, td {
+    padding: 10px; /* Padding for table cells */
+    text-align: left; /* Align text to the left */
+    border-bottom: 1px solid #ddd; /* Bottom border for cells */
+}
+
+/* Hide the scrollbar (for WebKit-based browsers like Chrome, Edge, Safari) */
+.table-wrapper::-webkit-scrollbar {
+    display: none; /* Completely hides the scrollbar */
+}
+
+/* Hide scrollbar for Firefox */
+.table-wrapper {
+    scrollbar-width: none; /* Hides the scrollbar in Firefox */
+    -ms-overflow-style: none; /* Hides the scrollbar in older versions of IE */
+}
