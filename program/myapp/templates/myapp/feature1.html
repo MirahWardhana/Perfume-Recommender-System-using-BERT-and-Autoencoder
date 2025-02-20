@@ -1,0 +1,270 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <href="https://fonts.googleapis.com/css2?family=Monoton&family=Rubik:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+    <title>Customize Notes and Description</title>
+
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="{% static 'myapp/assets/css/feature.css' %}">
+
+  </head>
+  <body class="no-scrollbar">
+    <!-- Input -->
+
+    <div class="row align-items-center">
+        <div class="col-12 col-md-6 input-section">
+          <div class="input-section-wrapper m-1">
+            <h2>Notes Selection</h2>
+            <div class="table-wrapper container mt-2 table-container" id="scroll-style">
+              <table class="table">
+                  <tbody>
+                      <tr>
+                          <td>floral</td>
+                          <td class="slider-container">
+                              <input 
+                                  type="range" 
+                                  min="0" 
+                                  max="100" 
+                                  value="50" 
+                                  class="form-range custom-slider" 
+                                  id="slider1" 
+                                  oninput="updateSlider(1)">
+                              <span id="sliderPercentage1" class="slider-percentage">50%</span>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>green</td>
+                          <td class="slider-container">
+                              <input 
+                                  type="range" 
+                                  min="0" 
+                                  max="100" 
+                                  value="75" 
+                                  class="form-range custom-slider" 
+                                  id="slider2" 
+                                  oninput="updateSlider(2)">
+                              <span id="sliderPercentage2" class="slider-percentage">75%</span>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>musky</td>
+                          <td class="slider-container">
+                              <input 
+                                  type="range" 
+                                  min="0" 
+                                  max="100" 
+                                  value="60" 
+                                  class="form-range custom-slider" 
+                                  id="slider3" 
+                                  oninput="updateSlider(3)">
+                              <span id="sliderPercentage3" class="slider-percentage">60%</span>
+                          </td>
+                      </tr>
+                      <tr>
+                        <td>woody</td>
+                        <td class="slider-container">
+                            <input 
+                                  type="range" 
+                                  min="0" 
+                                  max="100" 
+                                  value="25" 
+                                  class="form-range custom-slider" 
+                                  id="slider4" 
+                                  oninput="updateSlider(4)">
+                              <span id="sliderPercentage4" class="slider-percentage">25%</span>
+                        </td>
+                    </tr>
+                  </tbody>
+              </table>
+          </div>
+        </div>
+
+        </div>
+        <div class="col-12 col-md-6 description-section">
+            <div class="row">
+                <div class="col-sm-12 description-input-section">
+                  <div class="description-input-wrapper">
+                    <h2>Description</h2>
+                    <textarea class="no-scrollbar description-input" id="prediction-input" name="text" 
+                    rows="5" spellcheck="false"
+                    placeholder="Enter a description"></textarea>
+                  </div>
+                </div>
+                <div class="col-sm-12 button-section">
+                  <span class="button-group">
+                    <button class="btn btn-dark shiny-button m-1 get-recommendations-button" onclick="scrollToTarget()" type="submit">
+                        Get Recommendations
+                    </button>
+                    <button class="btn btn-outline-dark m-1 cancel-button" type="button" onclick="window.location.href='{% url 'index' %}'">
+                        Back
+                    </button>
+                      
+                  </span>
+                </div>
+              </div>
+        </div>
+    </div>
+
+    <!-- Hasil -->
+    <div id="targetDiv" class="result-section">
+        <!-- Bagian Judul -->
+        <div class="col-12">
+            <h2 class="mb-3">Result</h2>
+        </div>
+
+        <!-- Bagian Grid -->
+        <div class="container mt-4 mb-4 result-grid" id="scroll-style">
+            <div class="row g-0 grid-row">
+
+            <!-- Card -->
+            <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        
+                        <!-- Front -->
+                        <div class="flip-card-front">
+                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                            <div class="card-body">
+                                <h5 class="card-title">Card title Card title Card title</h5>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            </div>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="flip-card-back">
+                            <h5>More Info</h5>
+                            <p>Details about this item.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+    <script src="{% static "myapp/assets/js/feature.js" %}"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+
+</html>

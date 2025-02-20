@@ -295,7 +295,7 @@ html, body {
 .search-input {
   border-radius: 5px;
   height: 2.35rem;
-  width: 80%;
+  width: 70%;
   padding: 0.5rem; /* Tambahkan padding agar placeholder tidak terlalu dekat dengan border */
   border: 1px solid #ced4da; /* Berikan border yang jelas */
   font-size: 1rem; /* Atur ukuran font agar placeholder terlihat */
