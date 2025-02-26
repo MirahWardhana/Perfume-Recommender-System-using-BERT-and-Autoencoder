@@ -32,7 +32,7 @@
                     <input class="m-1 search-input" type="search" placeholder="Find a perfume name, brand, notes or description" />
                     <button type="button" class="btn btn-dark">Search</button>
                 </div>
-                <div class="col-sm-12 mb-5" style="max-width:100vh; height:70vh; overflow-y:scroll;" id="scroll-style">
+                <div class="col-sm-12 mb-1" style="max-width:100vh; height:70vh; overflow-y:scroll;" id="scroll-style">
                     <div class="row g-0 grid-row">
                         
                         {% for data in datas %}
@@ -50,11 +50,41 @@
                         {% empty %}
                         <p>Tidak ada data parfum yang tersedia.</p>
                         {% endfor %}
-                        
 
                     </div>
                 </div>
             </div>
+
+            <div class="pagination">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">«</span>
+                                </a>
+                            </li>
+                        {% endif %}
+        
+                        {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">»</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            
+            
+
         </div>
 
 

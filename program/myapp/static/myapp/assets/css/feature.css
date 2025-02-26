@@ -314,3 +314,17 @@ html, body {
   border-color: #000000; /* Berikan warna border yang berbeda saat difokuskan */
   box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25); /* Berikan efek shadow saat difokuskan */
 }
+
+.pagination ul {
+  display: flex; /*  Horizontal links within each row */
+  flex-wrap: wrap; /* Wrap links to next row if not enough space */
+  list-style: none; /* Remove default list styling */
+  padding: 0;      /* Remove default list padding */
+  margin: 0;
+}
+
+.pagination {
+  display: flex;   /* Stack pagination rows vertically */
+  flex-direction: column;  /* Stack rows into column */
+  align-items: center;     /* Center each row of pagination */
+}
