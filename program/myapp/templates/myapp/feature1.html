@@ -28,64 +28,26 @@
             <h2>Notes Selection</h2>
             <div class="table-wrapper container mt-2 table-container" id="scroll-style">
               <table class="table">
-                  <tbody>
-                      <tr>
-                          <td>floral</td>
-                          <td class="slider-container">
-                              <input 
-                                  type="range" 
-                                  min="0" 
-                                  max="100" 
-                                  value="50" 
-                                  class="form-range custom-slider" 
-                                  id="slider1" 
-                                  oninput="updateSlider(1)">
-                              <span id="sliderPercentage1" class="slider-percentage">50%</span>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td>green</td>
-                          <td class="slider-container">
-                              <input 
-                                  type="range" 
-                                  min="0" 
-                                  max="100" 
-                                  value="75" 
-                                  class="form-range custom-slider" 
-                                  id="slider2" 
-                                  oninput="updateSlider(2)">
-                              <span id="sliderPercentage2" class="slider-percentage">75%</span>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td>musky</td>
-                          <td class="slider-container">
-                              <input 
-                                  type="range" 
-                                  min="0" 
-                                  max="100" 
-                                  value="60" 
-                                  class="form-range custom-slider" 
-                                  id="slider3" 
-                                  oninput="updateSlider(3)">
-                              <span id="sliderPercentage3" class="slider-percentage">60%</span>
-                          </td>
-                      </tr>
-                      <tr>
-                        <td>woody</td>
+                <tbody>
+                    {% for note in df_notes %}
+                    <tr>
+                        <td>{{ note.Notes }}</td>
                         <td class="slider-container">
                             <input 
-                                  type="range" 
-                                  min="0" 
-                                  max="100" 
-                                  value="25" 
-                                  class="form-range custom-slider" 
-                                  id="slider4" 
-                                  oninput="updateSlider(4)">
-                              <span id="sliderPercentage4" class="slider-percentage">25%</span>
+                                type="range" 
+                                min="0" 
+                                max="100" 
+                                value="{{ note.percentage }}" 
+                                class="form-range custom-slider" 
+                                id="slider{{ forloop.counter }}" 
+                                oninput="updateSlider({{ forloop.counter }})">
+                            <span id="sliderPercentage{{ forloop.counter }}" class="slider-percentage">
+                                {{ note.percentage }}%
+                            </span>
                         </td>
                     </tr>
-                  </tbody>
+                    {% endfor %}
+                </tbody>
               </table>
           </div>
         </div>

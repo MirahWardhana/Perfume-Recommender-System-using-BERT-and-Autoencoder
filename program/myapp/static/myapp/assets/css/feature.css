@@ -1,275 +1,276 @@
 html, body {
-    font-family: 'Montserrat', sans-serif;
-    margin: 0;
-    height: 100vh;
-    overflow-y: scroll;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  height: 100vh;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.table-wrapper {
+  overflow-y: scroll;
+  border: 1px solid #ddd;
+  width: 80%;
+  margin: 0 auto;
+  max-height: 60vh;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td {
+  padding: 10px;
+  text-align: left;
+  border: none !important;
+}
+
+td:first-child {
+  width: 30%;
+}
+
+td:nth-child(2) {
+  width: 90%;
+}
+
+.table-container {
+  border: none;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.slider-percentage {
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+}
+
+.custom-slider {
+  width: 100%;
+}
+
+.custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; 
+    appearance: none; 
+    width: 0; 
+    height: 0; 
+}
+
+.custom-slider::-moz-range-thumb {
+    width: 0;
+    height: 0;
+}
+
+.custom-slider::-webkit-slider-runnable-track {
+  height: 0px;
+}
+
+.shiny-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.shiny-button::after {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 50px;
+  height: 50px;
+  background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 1) 100%, rgba(255, 255, 255, 0) 0%);
+  animation-name: shiny;
+  animation-duration: 3s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes shiny {
+  0% {
+    transform: scale(0) rotate(25deg);
+    opacity: 0;
   }
-  
-  html::-webkit-scrollbar, body::-webkit-scrollbar {
-    display: none;
+  50% {
+    transform: scale(1) rotate(25deg);
+    opacity: 1;
   }
-  
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+  100% {
+    transform: scale(50) rotate(25deg);
+    opacity: 0;
   }
-  
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .slider-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .slider-percentage {
-    font-weight: bold;
-    min-width: 40px;
-    text-align: center;
-  }
-  
-  .custom-slider {
-    width: 80%;
-  }
-  
-  .custom-slider::-webkit-slider-thumb {
-      -webkit-appearance: none; /* Remove default styling */
-      appearance: none; /* For Firefox */
-      width: 0; /* Hide the thumb */
-      height: 0; /* Hide the thumb */
-  }
-  
-  .custom-slider::-moz-range-thumb {
-      width: 0; /* Hide the thumb */
-      height: 0; /* Hide the thumb */
-  }
-  
-  .custom-slider::-webkit-slider-runnable-track {
-    height: 0px;
-  }
-  
-  .table-wrapper {
-    max-height: 200px;
-    overflow-y: scroll;
-    border: 1px solid #ddd;
-    width: 80%;
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  td {
-    padding: 10px;
-    text-align: left;
-    border: none !important;
-  }
-  
-  .table-container {
-    border: none;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  }
-  
-  .table-wrapper {
-    max-height: 50vh;
-  }
-  
-  .shiny-button {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .shiny-button::after {
-    content: '';
-    position: absolute;
-    top: -100px;
-    left: -100px;
-    width: 50px;
-    height: 50px;
-    background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 1) 100%, rgba(255, 255, 255, 0) 0%);
-    animation-name: shiny;
-    animation-duration: 3s;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
-  }
-  
-  @keyframes shiny {
-    0% {
-      transform: scale(0) rotate(25deg);
-      opacity: 0;
-    }
-    50% {
-      transform: scale(1) rotate(25deg);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(50) rotate(25deg);
-      opacity: 0;
-    }
-  }
-  
-  .flip-card {
-    perspective: 1000px;
-    cursor: pointer;
-  }
-  
-  .flip-card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.8s;
-    transform-style: preserve-3d;
-  }
-  
-  .flipped .flip-card-inner {
-    transform: rotateY(180deg);
-  }
-  
-  .flip-card-front, .flip-card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    padding: 10px;
-  }
-  
-  .flip-card-front {
-    background-color: #f8f9fa;
-  }
-  
-  .flip-card-back {
-    transform: rotateY(180deg);
-  }
-  
-  .card-title {
-    font-size: 1rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .card-text {
-    font-size: 0.7rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  /* Added styles for layout and appearance */
-  .input-section {
-    height: 60vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .input-section-wrapper {
-    width: 100%;
-  }
-  
-  .description-section {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .description-input-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .description-input-wrapper {
-    width: 100%;
-  }
-  
-  .description-input {
-    height: auto;
-    width: 80%;
-    margin: 5px;
-    font-size: 20px;
-    resize: none;
-    overflow-y: scroll;
-    border: none;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    padding: 10px;
-    border-radius: 5px;
-  }
-  
-  .button-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .button-group {
-    display: inline;
-  }
-  
-  .get-recommendations-button,
-  .cancel-button {
-    height: 40px;
-    width: 250px;
-  }
-  
-  .result-section {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .result-grid {
-    max-width: 150vh;
-    overflow-y: scroll;
-  }
-  
-  .grid-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-  }
-  
-  .card-wrapper {
-    width: 10rem;
-    height: 19rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: none;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  }
-  
-  .card-img-top {
-    width: 8rem;
-  }
+}
+
+.flip-card {
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.flip-card-front {
+  background-color: #f8f9fa;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+.card-title {
+  font-size: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-text {
+  font-size: 0.7rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input-section {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.input-section-wrapper {
+  width: 100%;
+}
+
+.description-section {
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 10vh;
+}
+
+.description-input-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.description-input-wrapper {
+  width: 100%;
+}
+
+.description-input {
+  height: auto;
+  width: 80%;
+  margin: 5px;
+  font-size: 20px;
+  resize: none;
+  overflow-y: scroll;
+  border: none;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.button-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.button-group {
+  display: inline;
+}
+
+.get-recommendations-button,
+.cancel-button {
+  height: 40px;
+  width: 250px;
+}
+
+.result-section {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.result-grid {
+  max-width: 150vh;
+  overflow-y: scroll;
+}
+
+.grid-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.card-wrapper {
+  width: 10rem;
+  height: 19rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.card-img-top {
+  width: 8rem;
+}
 
 #scroll-style::-webkit-scrollbar-track {
   border: 1px solid black;
@@ -285,9 +286,8 @@ html, body {
   background-color: #000000;
 }
 
-/* Tambahkan ini untuk Firefox jika Anda ingin style yang serupa */
 #scroll-style {
-  scrollbar-width: thin; /* atau auto, tergantung preferensi */
+  scrollbar-width: thin; 
   scrollbar-color: #000000 #F5F5F5; /* thumb track */
 }
 
@@ -315,16 +315,3 @@ html, body {
   box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25); /* Berikan efek shadow saat difokuskan */
 }
 
-.pagination ul {
-  display: flex; /*  Horizontal links within each row */
-  flex-wrap: wrap; /* Wrap links to next row if not enough space */
-  list-style: none; /* Remove default list styling */
-  padding: 0;      /* Remove default list padding */
-  margin: 0;
-}
-
-.pagination {
-  display: flex;   /* Stack pagination rows vertically */
-  flex-direction: column;  /* Stack rows into column */
-  align-items: center;     /* Center each row of pagination */
-}
