@@ -21,62 +21,66 @@
   </head>
   <body class="no-scrollbar">
     <!-- Input -->
-
-    <div class="row align-items-center">
-        <div class="col-12 col-md-6 input-section">
-          <div class="input-section-wrapper m-1">
-            <h2>Notes Selection</h2>
-            <div class="table-wrapper container mt-2 table-container" id="scroll-style">
-              <table class="table">
-                <tbody>
-                    {% for note in df_notes %}
-                    <tr>
-                        <td>{{ note.Notes }}</td>
-                        <td class="slider-container">
-                            <input 
-                                type="range" 
-                                min="0" 
-                                max="100" 
-                                value="{{ note.percentage }}" 
-                                class="form-range custom-slider" 
-                                id="slider{{ forloop.counter }}" 
-                                oninput="updateSlider({{ forloop.counter }})">
-                            <span id="sliderPercentage{{ forloop.counter }}" class="slider-percentage">
-                                {{ note.percentage }}%
-                            </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-              </table>
-          </div>
-        </div>
-
-        </div>
-        <div class="col-12 col-md-6 description-section">
-            <div class="row">
-                <div class="col-sm-12 description-input-section">
-                  <div class="description-input-wrapper">
-                    <h2>Description</h2>
-                    <textarea class="no-scrollbar description-input" id="prediction-input" name="text" 
-                    rows="5" spellcheck="false"
-                    placeholder="Enter a description"></textarea>
-                  </div>
-                </div>
-                <div class="col-sm-12 button-section">
-                  <span class="button-group">
-                    <button class="btn btn-dark shiny-button m-1 get-recommendations-button" onclick="scrollToTarget()" type="submit">
-                        Get Recommendations
-                    </button>
-                    <button class="btn btn-outline-dark m-1 cancel-button" type="button" onclick="window.location.href='{% url 'index' %}'">
-                        Back
-                    </button>
-                      
-                  </span>
-                </div>
+    <form action="{% url 'feature1' %}" method="POST">
+        {% csrf_token %}
+        <div class="row align-items-center">
+            <div class="col-12 col-md-6 input-section">
+              <div class="input-section-wrapper m-1">
+                <h2>Notes Selection</h2>
+                <div class="table-wrapper container mt-2 table-container" id="scroll-style">
+                  <table class="table">
+                    <tbody>
+                        {% for note in df_notes %}
+                        <tr>
+                            <td >{{ note.Notes }}</td>
+                            <td class="slider-container">
+                                <input
+                                    name="percentage_{{ forloop.counter }}"
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value="{{ note.percentage }}"
+                                    class="form-range custom-slider"
+                                    id="slider{{ forloop.counter }}"
+                                    oninput="updateSlider({{ forloop.counter }})">
+                                <span id="sliderPercentage{{ forloop.counter }}" class="slider-percentage">
+                                    {{ note.percentage }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                  </table>
               </div>
+            </div>
+    
+            </div>
+            <div class="col-12 col-md-6 description-section">
+                <div class="row">
+                    <div class="col-sm-12 description-input-section">
+                        <div class="description-input-wrapper">
+                            <h2>Description</h2>
+                            <textarea class="no-scrollbar description-input" id="prediction-input" name="description" type="text"
+                            rows="5" spellcheck="false"
+                            placeholder="Enter a description"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 button-section">
+                      <span class="button-group">
+                        <button class="btn btn-dark shiny-button m-1 get-recommendations-button" type="submit" onclick="scrollToTarget()">
+                            Get Recommendations
+                        </button>
+                        <button class="btn btn-outline-dark m-1 cancel-button" type="button" onclick="window.location.href='{% url 'index' %}'">
+                            Back
+                        </button>
+    
+                      </span>
+                    </div>
+                  </div>
+            </div>
         </div>
-    </div>
+    
+    </form>
 
     <!-- Hasil -->
     <div id="targetDiv" class="result-section">

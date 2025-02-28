@@ -32,5 +32,5 @@ function scrollToInsight() {
 }
 
 function scrollToTarget() {
-  document.getElementById("targetDiv").scrollIntoView({ behavior: "smooth" });
+    document.getElementById("targetDiv").scrollIntoView({ behavior: "smooth" });
 }

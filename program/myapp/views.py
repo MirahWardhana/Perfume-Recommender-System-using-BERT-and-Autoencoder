@@ -4,7 +4,6 @@ import os
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 import numpy as np
-import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from tensorflow.keras.models import load_model
 import joblib
@@ -32,8 +31,8 @@ notes_list = [
     'soft spicy', 'floral', 'mossy', 'caramel', 'animalic'
 ]
 
-notes = pd.DataFrame({'Notes': notes_list})  
-notes['percentage'] = 0  
+notes = pd.DataFrame({'Notes': notes_list})
+notes['percentage'] = 0
 
 
 def convert_df_to_list(df):
@@ -50,12 +49,12 @@ def bert_recommend(query, model_bert, doc_embeddings, df):
     similarities = cosine_similarity(query_embedding, doc_embeddings)
 
     # Tambahkan skor kesamaan ke DataFrame tanpa mengurutkan
-    results = df.copy()  
+    results = df.copy()
     results['Similarity'] = similarities[0]
     return results
 
 
-def bert_model(query): 
+def bert_model(query):
     # Load model yang sudah disimpan
     model_bert = SentenceTransformer('bert_model/bert_model')
 
@@ -65,9 +64,9 @@ def bert_model(query):
     if (query == ""):
         print("Query is empty. Please insert a text...")
 
-    else: 
+    else:
         result_bert = bert_recommend(query, model_bert, doc_embeddings, df)
-        
+
     # Tampilkan hasil pencarian
     return result_bert.sort_values(by='Similarity', ascending=False)
 
@@ -80,21 +79,22 @@ def recommend_autoencoder(input_encoding, perfume_encodings):
     recommendations_df = pd.DataFrame({
         'Similarity': similarities[0]
     })
-    
+
     # Concatenate the similarity scores with the original DataFrame
     recommendations_df = pd.concat([recommendations_df, df], axis=1)
-    
+
     return recommendations_df
 
-def autoencoder_model(query_encoding ):
+
+def autoencoder_model(query_encoding):
     numerical_columns = df.select_dtypes(include=['float64', 'int64', 'int32']).columns
     columns_to_exclude = ['Rating Value', 'Best Rating', 'Votes']
     features = numerical_columns.drop(columns_to_exclude)
-    
+
     # Load autoencoder dan encoder
     autoencoder = load_model('autoencoder_model/autoencoder_model.h5')
     scaler = joblib.load('autoencoder_model/scaler.pkl')
-    
+
     X = df[features].values
     X_scaled = scaler.transform(X)
     perfume_encodings = autoencoder.predict(X_scaled)
@@ -106,23 +106,50 @@ def autoencoder_model(query_encoding ):
     return result_autoencoder.sort_values(by='Similarity', ascending=False)
 
 
-
 # Views
 def index(request):
     return render(request, "myapp/index.html")
 
-
 def feature1(request):
-    notes["Notes"] = notes["Notes"].str.replace("_", " ").str.title()
-    
-    df_notes = convert_df_to_list(notes) 
-    
-    return render(request, "myapp/feature1.html", {
-        "df_notes": df_notes
-    })
+    if request.method == 'POST':
 
+        description = request.POST.get('description', '')
+
+        percentages = []
+
+        # Ambil semua note dan percentage dari request.POST
+        num_notes = len(notes_list)  
+
+        for i in range(1, num_notes + 1):
+            percentage_key = f'percentage_{i}'
+            percentage = request.POST.get(percentage_key, '0') 
+            percentages.append(int(percentage))  
+
+        print(f"Deskripsi: {description}")
+        print(f"Persentase: {percentages}")
+        print(f"Notes: {notes_list}")
+
+        context = {
+            'description': description,
+            'percentages': percentages,
+            'notes': notes_list,
+        }
+        return render(request, "myapp/feature1.html", context)
+
+    else:
+        notes_df = notes.copy()
+        notes_df["Notes"] = notes_df["Notes"].str.replace("_", " ").str.title()
+        df_notes = convert_df_to_list(notes_df)
+
+        return render(request, "myapp/feature1.html", {
+            "df_notes": df_notes
+        })
 
 def feature2(request):
+    if request.method == 'POST':
+        url = request.POST.get('url', '')
+        print(url)
+
     df_list = convert_df_to_list(df)
 
     # Ambil parameter halaman dari request
@@ -132,8 +159,8 @@ def feature2(request):
     paginator = Paginator(df_list, 100)
     page_obj = paginator.get_page(page)
 
+
     return render(request, "myapp/feature2.html", {
         "datas": page_obj.object_list,
-        "page_obj": page_obj  
+        "page_obj": page_obj
     })
-    

@@ -1,3 +1,43 @@
+:root {
+
+  /**
+   * colors 
+   */
+
+  --red-orange-crayola: hsl(0, 100%, 66%);
+  --space-cadet: hsl(249, 37%, 19%);
+  --space-cadet-bright:hsl(251, 43%, 12%);
+  --pistachio: hsl(88, 50%, 60%);
+  --cultured: hsl(220, 13%, 95%);
+  --saffron: hsl(350, 72%, 49%);
+  --rhythm: hsl(240, 9%, 51%);
+  --white: hsl(0, 0%, 100%);
+
+  /**
+   * typography 
+   */
+
+  --fs-1: 46px;
+  --fs-2: 28px;
+  --fs-3: 18px;
+  --fs-4: 15px;
+  --fs-5: 14px;
+
+  /**
+   * spacing 
+   */
+
+  --px: 30px;
+  --py: 60px;
+
+  /**
+   * others 
+   */
+
+  --default-transition: 0.75s ease;
+
+}
+
 html, body {
   font-family: 'Montserrat', sans-serif;
   margin: 0;
