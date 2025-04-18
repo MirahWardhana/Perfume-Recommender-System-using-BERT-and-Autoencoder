@@ -67,7 +67,8 @@
                     </div>
                     <div class="col-sm-12 button-section">
                       <span class="button-group">
-                        <button class="btn btn-dark shiny-button m-1 get-recommendations-button" type="submit" onclick="scrollToTarget()">
+                        <button class="btn btn-dark shiny-button m-1 get-recommendations-button" type="submit">
+                            {% comment %} onclick="scrollToTarget()" {% endcomment %}
                             Get Recommendations
                         </button>
                         <button class="btn btn-outline-dark m-1 cancel-button" type="button" onclick="window.location.href='{% url 'index' %}'">
@@ -92,133 +93,36 @@
         <!-- Bagian Grid -->
         <div class="container mt-4 mb-4 result-grid" id="scroll-style">
             <div class="row g-0 grid-row">
-
-            <!-- Card -->
-            <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                {% if recommendations %}
+                    {% for recommendation in recommendations %}
+                        <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
+                            <div class="flip-card-inner">
+    
+                                <!-- Front -->
+                                <div class="flip-card-front">
+                                    <img class="card-img-top" src="{{ recommendation.Image }}" alt="{{ recommendation.Perfume_Name }}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ recommendation.Perfume_Name }}</h5>
+                                        <p class="card-text">{{ recommendation.Brand_Name }}</p>
+                                        <p class="card-text">{{ recommendation.Gender }}</p>
+                                    </div>
+                                </div>
+    
+                                <!-- Back -->
+                                <div class="flip-card-back">
+                                    <h5>More Info</h5>
+                                     <!-- Link ke halaman Fragrantica -->
+                                    <a href="{{ recommendation.URL }}" target="_blank" rel="noopener noreferrer">
+                                        View on Fragrantica
+                                    </a>
+                                </div>
+    
                             </div>
                         </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No recommendations found.</p>
+                {% endif %}
             </div>
         </div>
     </div>

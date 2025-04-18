@@ -1,166 +1,142 @@
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.csrf import csrf_protect
 from django.core.paginator import Paginator
-from django.shortcuts import render
-import os
+from django.http import JsonResponse
+import json
 import pandas as pd
-from sentence_transformers import SentenceTransformer
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-from tensorflow.keras.models import load_model
-import joblib
-
-# Ambil path file dataset secara dinamis
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_PATH = os.path.join(BASE_DIR, 'dataset/preprocessed_data.xlsx')
-
-df = pd.read_excel(DATA_PATH)
-df.columns = df.columns.str.replace(" ", "_")
-
-notes_list = [
-    'rubber', 'violet', 'citrus', 'foresty', 'vinyl', 'green', 'camphor',
-    'clay', 'ozonic', 'bitter', 'lactonic', 'wine', 'chocolate', 'paper',
-    'lavender', 'musky', 'sour', 'earthy', 'terpenic', 'Pear', 'oud',
-    'cannabis', 'salty', 'coffee', 'metallic', 'almond', 'oily', 'herbal',
-    'smoky', 'balsamic', 'conifer', 'tennis ball', 'alcohol', 'aquatic',
-    'woody', 'leather', 'tropical', 'industrial glue', 'vanilla', 'beeswax',
-    'amber', 'rose', 'coca-cola', 'cherry', 'nutty', 'tobacco', 'whiskey',
-    'soapy', 'fresh', 'brown scotch tape', 'asphault', 'rum', 'mineral',
-    'aldehydic', 'iris', 'plastic', 'warm spicy', 'marine', 'anis',
-    'tuberose', 'aromatic', 'Champagne', 'savory', 'fresh spicy', 'sand',
-    'powdery', 'cinnamon', 'cacao', 'yellow floral', 'coconut', 'sweet',
-    'vodka', 'honey', 'white floral', 'sake', 'fruity', 'patchouli',
-    'soft spicy', 'floral', 'mossy', 'caramel', 'animalic'
-]
-
-notes = pd.DataFrame({'Notes': notes_list})
-notes['percentage'] = 0
-
-
-def convert_df_to_list(df):
-    """Konversi DataFrame ke list of dictionaries."""
-    return df.to_dict(orient='records')
-
-
-# BERT MODEL
-def bert_recommend(query, model_bert, doc_embeddings, df):
-    # Encode query
-    query_embedding = model_bert.encode([query])
-
-    # Hitung kesamaan cosine
-    similarities = cosine_similarity(query_embedding, doc_embeddings)
-
-    # Tambahkan skor kesamaan ke DataFrame tanpa mengurutkan
-    results = df.copy()
-    results['Similarity'] = similarities[0]
-    return results
-
-
-def bert_model(query):
-    # Load model yang sudah disimpan
-    model_bert = SentenceTransformer('bert_model/bert_model')
-
-    # Load embeddings dari file .npy
-    doc_embeddings = np.load('bert_model/doc_embeddings.npy')
-
-    if (query == ""):
-        print("Query is empty. Please insert a text...")
-
-    else:
-        result_bert = bert_recommend(query, model_bert, doc_embeddings, df)
-
-    # Tampilkan hasil pencarian
-    return result_bert.sort_values(by='Similarity', ascending=False)
-
-
-# AUTOENCODER MODEL
-# Recommendation function
-def recommend_autoencoder(input_encoding, perfume_encodings):
-    similarities = cosine_similarity(input_encoding, perfume_encodings)
-
-    recommendations_df = pd.DataFrame({
-        'Similarity': similarities[0]
-    })
-
-    # Concatenate the similarity scores with the original DataFrame
-    recommendations_df = pd.concat([recommendations_df, df], axis=1)
-
-    return recommendations_df
-
-
-def autoencoder_model(query_encoding):
-    numerical_columns = df.select_dtypes(include=['float64', 'int64', 'int32']).columns
-    columns_to_exclude = ['Rating Value', 'Best Rating', 'Votes']
-    features = numerical_columns.drop(columns_to_exclude)
-
-    # Load autoencoder dan encoder
-    autoencoder = load_model('autoencoder_model/autoencoder_model.h5')
-    scaler = joblib.load('autoencoder_model/scaler.pkl')
-
-    X = df[features].values
-    X_scaled = scaler.transform(X)
-    perfume_encodings = autoencoder.predict(X_scaled)
-
-    # Dapatkan rekomendasi
-    result_autoencoder = recommend_autoencoder(query_encoding, perfume_encodings)
-
-    # Tampilkan 10 rekomendasi teratas
-    return result_autoencoder.sort_values(by='Similarity', ascending=False)
-
+from .models import notes, get_combined_recommendations, convert_df_to_list, df, model_bert, autoencoder, scaler
+from django.urls import reverse
 
 # Views
 def index(request):
     return render(request, "myapp/index.html")
 
 def feature1(request):
+    notes_df = notes.copy()
+    notes_df["Notes"] = notes_df["Notes"].str.replace("_", " ").str.title()
+    df_notes = convert_df_to_list(notes_df)
+
     if request.method == 'POST':
-
         description = request.POST.get('description', '')
-
         percentages = []
+        num_notes = len(notes)
 
-        # Ambil semua note dan percentage dari request.POST
-        num_notes = len(notes_list)  
+        # Debugging: Cetak semua data POST
+        print("--- POST Data ---")
+        for key, value in request.POST.items():
+            print(f"{key}: {value}")
+        print("------------------")
+
 
         for i in range(1, num_notes + 1):
             percentage_key = f'percentage_{i}'
-            percentage = request.POST.get(percentage_key, '0') 
-            percentages.append(int(percentage))  
+            percentage = request.POST.get(percentage_key)  # Hapus default value
 
-        print(f"Deskripsi: {description}")
-        print(f"Persentase: {percentages}")
-        print(f"Notes: {notes_list}")
+            # Periksa apakah percentage ada dan merupakan angka
+            if percentage: 
+                try:
+                    percentages.append(int(percentage))
+                except ValueError:
+                    print(f"Warning: Invalid percentage value for {percentage_key}: {percentage}")
+                    percentages.append(0)  # Atau berikan nilai default lain, atau lewati
+            else:
+                print(f"Warning: Missing percentage value for {percentage_key}")  
+                percentages.append(0) # Masukkan nilai default jika tidak ada
+                
+
+        # Dapatkan rekomendasi
+        recommendations_df = get_combined_recommendations(description, percentages)
+        recommendations = recommendations_df.to_dict(orient='records')
+        
+        print(recommendations)
 
         context = {
             'description': description,
             'percentages': percentages,
-            'notes': notes_list,
+            'notes': notes.Notes.tolist(),
+            "df_notes": df_notes,
+            'recommendations': recommendations,
         }
+
         return render(request, "myapp/feature1.html", context)
-
     else:
-        notes_df = notes.copy()
-        notes_df["Notes"] = notes_df["Notes"].str.replace("_", " ").str.title()
-        df_notes = convert_df_to_list(notes_df)
+        return render(request, "myapp/feature1.html", {"df_notes": df_notes})
 
-        return render(request, "myapp/feature1.html", {
-            "df_notes": df_notes
-        })
 
+
+@csrf_protect
+@require_POST
+def process_url(request):
+    try:
+        data = json.loads(request.body)
+        url = data.get('url')
+        if url is None:
+             return JsonResponse({'status': 'error', 'message': 'URL key is missing.'}, status=400)
+
+        input_df, numeric_df = insight(url)
+
+        if input_df.empty:
+            return JsonResponse({'status': 'error', 'message': 'URL not found.'}, status=404)
+
+        request.session['numeric_df'] = numeric_df.to_dict(orient='records')
+        request.session['input_df'] = input_df.to_dict(orient='records')
+        return JsonResponse({'status': 'success', 'message': 'URL diterima.'})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON.'}, status=400)
+    except KeyError:
+        return JsonResponse({'status': 'error', 'message': 'URL key is missing.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+def insight(url):
+    input_df = df[df['URL'] == url]
+    numeric_cols = input_df.select_dtypes(include=['number']).columns
+    non_zero_mask = (input_df[numeric_cols] != 0)
+    filtered_numeric = input_df[numeric_cols].loc[:, non_zero_mask.any()]  
+    result_df = pd.concat([input_df.drop(columns=numeric_cols), filtered_numeric], axis=1)
+    result_df = result_df.drop(columns=['Unnamed:_0','Rating_Value', 'Best_Rating', 'Votes'], errors='ignore')
+    numeric_df = result_df.select_dtypes(include=['number'])
+    return input_df, numeric_df
+    
 def feature2(request):
     if request.method == 'POST':
-        url = request.POST.get('url', '')
-        print(url)
+        return redirect('feature2')
 
     df_list = convert_df_to_list(df)
-
-    # Ambil parameter halaman dari request
-    page = request.GET.get('page', 1)
-
-    # Paginasi dengan 100 item per halaman
+    page_number = request.GET.get('page', 1)
     paginator = Paginator(df_list, 100)
-    page_obj = paginator.get_page(page)
+    page_obj = paginator.get_page(page_number)
 
+    # Calculate elided page range in the view
+    elided_page_range = paginator.get_elided_page_range(number=page_obj.number, 
+                                                         on_each_side=2, 
+                                                         on_ends=2)
 
-    return render(request, "myapp/feature2.html", {
+    # Retrieve numeric_df data from the session (if it exists)
+    numeric_df_data = request.session.get('numeric_df')
+    input_df_data = request.session.get('input_df')
+    numeric_df = None
+    input_df = None
+
+    if numeric_df_data:
+        numeric_df = pd.DataFrame(numeric_df_data)
+        # Modify the column names *before* passing to the template
+        new_cols = []
+        for col in numeric_df.columns:
+             new_cols.append(col.replace("_", " ").title())
+        numeric_df.columns = new_cols
+    if input_df_data:
+        input_df = pd.DataFrame(input_df_data)
+
+    # Add elided_page_range to the context
+    context = {
         "datas": page_obj.object_list,
-        "page_obj": page_obj
-    })
+        "page_obj": page_obj,
+        "numeric_df": numeric_df,
+        "input_df": input_df,
+        "elided_page_range": elided_page_range,
+    }
+    return render(request, "myapp/feature2.html", context)

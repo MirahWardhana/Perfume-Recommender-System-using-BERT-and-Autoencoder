@@ -33,32 +33,84 @@
                 <div class="col-sm-12 mb-5" style="max-width:100vh; height:80vh; overflow-y:scroll;" id="scroll-style">
                     <div class="row g-0 grid-row">
 
-                        <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="handleClick(this); scrollToInsight();">
+                        {% for data in datas %}
+                        <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" 
+                             onclick="handleClick(this); scrollToInsight(); sendUrlToBackend('{{ data.URL }}');">
                             <div class="flip-card-inner">
                                 <div class="flip-card-front">
-                                    <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
+                                    <img class="card-img-top" src="{{ data.Image_URL }}" alt="{{ data.Name }}">
                                     <div class="card-body">
-                                        <h5 class="card-title">Card title Card title Card title</h5>
-                                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                        <h5 class="card-title">{{ data.Name }}</h5>
+                                        <p class="card-text">{{ data.Brand }}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="handleClick(this); scrollToInsight();" >
-                            <div class="flip-card-inner">
-                                <div class="flip-card-front">
-                                    <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                                    <div class="card-body">
-                                        <h5 class="card-title">Card title Card title Card title</h5>
-                                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        {% empty %}
+                        <p>No data available.</p>
+                        {% endfor %}
                         
 
                     </div>
+                     <!-- Pagination Controls -->
+                    {% with on_each_side=2 on_ends=1 %} {# Adjust these numbers as needed #}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mt-4">
+                            {% if page_obj.has_other_pages %} {# Only show pagination if needed #}
+
+                                {# Previous Button #}
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                                {% endif %}
+
+                                {# Page Numbers Logic #}
+                                {% set ellipsis_shown_flag = False %} {# Flag to track if ellipsis was just displayed #}
+                                {% for i in page_obj.paginator.page_range %}
+                                    {% comment %} Calculate page ranges to display {% endcomment %}
+                                    {% set show_start_range = i <= on_ends %}
+                                    {% set show_end_range = i > page_obj.paginator.num_pages|add:-on_ends %}
+                                    {% set show_current_range = i >= page_obj.number|add:-on_each_side and i <= page_obj.number|add:on_each_side %}
+
+                                    {% if show_start_range or show_end_range or show_current_range %}
+                                        {# This page number should be shown #}
+                                        {% if page_obj.number == i %}
+                                            <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                                        {% else %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                        {% endif %}
+                                        {% set ellipsis_shown_flag = False %} {# Reset flag: we just showed a number #}
+                                    {% else %}
+                                        {# This page number is in a gap, potentially show ellipsis #}
+                                        {% if not ellipsis_shown_flag %}
+                                            {# Show ellipsis only if the flag is false #}
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                            {% set ellipsis_shown_flag = True %} {# Set flag: we just showed an ellipsis #}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {# Next Button #}
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                                {% endif %}
+
+                            {% endif %} {# End if page_obj.has_other_pages #}
+                        </ul>
+                    </nav>
+                    {% endwith %}
+                    <!-- End Pagination Controls -->
                 </div>
             </div>
         </div>

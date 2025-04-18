@@ -34,12 +34,11 @@
 
                 <div class="col-sm-12 mb-1" style="max-width:100vh; height:70vh; overflow-y:scroll;" id="scroll-style">
                     <div class="row g-0 grid-row">
-                        
                         {% for data in datas %}
-                        <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="scrollToInsight()">
+                        <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="processCardClick('{{ data.URL }}')">
                             <div class="flip-card-inner">
                                 <div class="flip-card-front">
-                                    <h1 style="visibility: hidden; font-size:0px;" >{{ data.URL }}</h1>
+                                    <h1 style="visibility: hidden; font-size:0; ">{{ data.URL }}</h1>
                                     <img class="card-img-top" src="{{ data.Image }}" alt="{{ data.Perfume_Name }}">
                                     <div class="card-body">
                                         <h5 class="card-title">{{ data.Perfume_Name }}</h5>
@@ -51,27 +50,34 @@
                         {% empty %}
                         <p>Tidak ada data parfum yang tersedia.</p>
                         {% endfor %}
-
                     </div>
                 </div>
             </div>
 
 
-            <div class="pagination">
+            <div class="pagination d-flex justify-content-center mt-3">
                 <nav aria-label="Page navigation">
-                    <ul class="pagination" style="background-color:yellow; height: 30px; width: 500px; display: flex;">
+                    <ul class="pagination pagination-custom">
                         {% if page_obj.has_previous %}
                             <li class="page-item">
                                 <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
                                     <span aria-hidden="true">«</span>
                                 </a>
                             </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">«</span>
+                            </li>
                         {% endif %}
         
-                        {% for num in page_obj.paginator.page_range %}
-                            <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
+                        {% for num in elided_page_range %}
+                            {% if num == page_obj.paginator.ELLIPSIS %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% else %}
+                                <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
                         {% endfor %}
         
                         {% if page_obj.has_next %}
@@ -79,6 +85,10 @@
                                 <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
                                     <span aria-hidden="true">»</span>
                                 </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">»</span>
                             </li>
                         {% endif %}
                     </ul>
@@ -97,66 +107,33 @@
                 </div>
                 <div class="col-12 col-md-8" style="height:40vh; display:flex; align-items: center;" >
                     <div class="table-wrapper container mt-2 table-container" id="scroll-style" style="width:100%;">
+                        
+                        {% if numeric_df %}
                         <table class="table">
                             <tbody>
+                                {% for col, val in numeric_df.0.items %}
+                                {% if val > 0 %}
                                 <tr>
-                                    <td>floral</td>
+                                    <td>{{ col }}</td>
                                     <td class="slider-container">
                                         <input 
                                             type="range" 
                                             min="0" 
                                             max="100" 
-                                            value="50" 
+                                            value="{{ val|floatformat:0 }}" 
                                             class="form-range custom-slider" 
-                                            id="slider1" 
-                                            oninput="updateSlider(1)">
-                                        <span id="sliderPercentage1" class="slider-percentage">50%</span>
+                                            id="slider{{ forloop.counter }}" 
+                                            oninput="updateSlider({{ forloop.counter }})">
+                                        <span id="sliderPercentage1" class="slider-percentage">{{ val|floatformat:2 }}%</span>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>green</td>
-                                    <td class="slider-container">
-                                        <input 
-                                            type="range" 
-                                            min="0" 
-                                            max="100" 
-                                            value="75" 
-                                            class="form-range custom-slider" 
-                                            id="slider2" 
-                                            oninput="updateSlider(2)">
-                                        <span id="sliderPercentage2" class="slider-percentage">75%</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>musky</td>
-                                    <td class="slider-container">
-                                        <input 
-                                            type="range" 
-                                            min="0" 
-                                            max="100" 
-                                            value="60" 
-                                            class="form-range custom-slider" 
-                                            id="slider3" 
-                                            oninput="updateSlider(3)">
-                                        <span id="sliderPercentage3" class="slider-percentage">60%</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                  <td>woody</td>
-                                  <td class="slider-container">
-                                      <input 
-                                            type="range" 
-                                            min="0" 
-                                            max="100" 
-                                            value="25" 
-                                            class="form-range custom-slider" 
-                                            id="slider4" 
-                                            oninput="updateSlider(4)">
-                                        <span id="sliderPercentage4" class="slider-percentage">25%</span>
-                                  </td>
-                              </tr>
+                                {% endif %}
+                                {% endfor %}
                             </tbody>
                         </table>
+                        {% else %}
+                            <p>Click a perfume card to load data.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
