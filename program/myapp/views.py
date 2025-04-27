@@ -5,9 +5,10 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 import json
 import pandas as pd
-from .models import notes, get_combined_recommendations, convert_df_to_list, df, model_bert, autoencoder, scaler
+from .models import notes, get_combined_recommendations, convert_df_to_list, df, model_bert, autoencoder, scaler, features
 from django.urls import reverse
 import traceback
+import numpy as np
 
 # Views
 def index(request):
@@ -16,43 +17,69 @@ def index(request):
 def feature1(request):
     notes_df = notes.copy()
     notes_df["Notes"] = notes_df["Notes"].str.replace("_", " ").str.title()
-    df_notes_list = convert_df_to_list(notes_df)
-
-    context = {"df_notes": df_notes_list}
+    notes_name_list = notes_df["Notes"].tolist()
+    context = {"df_notes": notes_df.to_dict(orient='records')}
 
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     if request.method == 'POST':
         try:
+            description = ''
+            percentages_dict = {}
+
             if is_ajax:
                 data = json.loads(request.body)
                 description = data.get('description', '')
-                percentages = data.get('percentages', [])
-                if not isinstance(percentages, list) or not all(isinstance(p, (int, float)) for p in percentages):
-                    return JsonResponse({'status': 'error', 'message': 'Invalid percentages format.'}, status=400)
+                percentages_input = data.get('percentages', {})
+                if not isinstance(percentages_input, dict):
+                    return JsonResponse({'status': 'error', 'message': 'Invalid percentages format (expected dictionary).'}, status=400)
+                for note, perc in percentages_input.items():
+                    if isinstance(perc, (int, float)):
+                        percentages_dict[note] = perc
+                    else:
+                        percentages_dict[note] = 0
+
             else:
                 description = request.POST.get('description', '')
-                percentages = []
-                num_notes = len(notes)
-                for i in range(1, num_notes + 1):
-                    percentage_key = f'percentage_{i}'
+                for i, note_name in enumerate(notes_name_list):
+                    percentage_key = f'percentage_{i+1}'
                     percentage_str = request.POST.get(percentage_key)
                     try:
-                        percentages.append(int(percentage_str) if percentage_str else 0)
+                        percentage_val = int(percentage_str) if percentage_str else 0
+                        percentages_dict[note_name] = percentage_val
                     except (ValueError, TypeError):
-                        print(f"Warning: Invalid percentage value for {percentage_key}: {percentage_str}")
-                        percentages.append(0)
+                        print(f"Warning: Invalid percentage value for {percentage_key} ({note_name}): {percentage_str}")
+                        percentages_dict[note_name] = 0
 
-            # Pad percentages list to ensure it has length 82
-            while len(percentages) < 82:
-                percentages.append(0)
+            ordered_percentages = []
+            if features:
+                num_expected_features = len(features)
+                print(f"Expected number of features from models.py: {num_expected_features}")
+                print(f"Features order from models.py: {features}")
+                for feature_name in features:
+                    normalized_feature_name = feature_name.replace("_", " ").title()
+                    percentage_value = percentages_dict.get(normalized_feature_name, 0)
+                    ordered_percentages.append(percentage_value)
+
+                print(f"Number of percentages after ordering: {len(ordered_percentages)}")
+                if len(ordered_percentages) != num_expected_features:
+                    print(f"Warning: Mismatch between ordered percentages ({len(ordered_percentages)}) and expected features ({num_expected_features}). Padding/truncating may occur in model function.")
+            else:
+                print("Error: 'features' list from models.py is empty. Cannot determine correct percentage order.")
+                if is_ajax:
+                    return JsonResponse({'status': 'error', 'message': 'Model features not loaded correctly.'}, status=500)
+                else:
+                    context['error_message'] = 'Model features not loaded correctly.'
+                    return render(request, "myapp/feature1.html", context)
+
             print("--- Request Data ---")
             print(f"Description: {description}")
-            print(f"Percentages: {percentages}")
+            print(f"Input Percentages Dict: {percentages_dict}")
+            print(f"Ordered Percentages List (to model): {ordered_percentages}")
             print(f"Is AJAX: {is_ajax}")
             print("--------------------")
-            
-            recommendations_df = get_combined_recommendations(description, percentages)
+
+            recommendations_df = get_combined_recommendations(description, ordered_percentages)
 
             if recommendations_df.empty:
                 print("No recommendations generated by the model.")
@@ -68,8 +95,8 @@ def feature1(request):
                     return JsonResponse({'recommendations': recommendations})
                 else:
                     context['description'] = description
-                    context['percentages'] = percentages
-                    context['recommendations'] = recommendations
+                    context['input_percentages'] = percentages_dict
+                    context['recommendations'] = recommendations if not recommendations_df.empty else []
             
             return render(request, "myapp/feature1.html", context)
 
@@ -116,11 +143,14 @@ def process_url(request):
 
 def insight(url):
     input_df = df[df['URL'] == url]
+    if input_df.empty:
+        return pd.DataFrame(), pd.DataFrame()
+
     numeric_cols = input_df.select_dtypes(include=['number']).columns
-    non_zero_mask = (input_df[numeric_cols] != 0)
-    filtered_numeric = input_df[numeric_cols].loc[:, non_zero_mask.any()]  
+    non_zero_mask = (input_df[numeric_cols] != 0) & (input_df[numeric_cols].notna())
+    filtered_numeric = input_df[numeric_cols].loc[:, non_zero_mask.any(axis=0)]
     result_df = pd.concat([input_df.drop(columns=numeric_cols), filtered_numeric], axis=1)
-    result_df = result_df.drop(columns=['Unnamed:_0','Rating_Value', 'Best_Rating', 'Votes'], errors='ignore')
+    result_df = result_df.drop(columns=['Unnamed:_0', 'Rating_Value', 'Best_Rating', 'Votes'], errors='ignore')
     numeric_df = result_df.select_dtypes(include=['number'])
     return input_df, numeric_df
     
