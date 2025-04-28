@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 import json
 import pandas as pd
-from .models import notes, get_combined_recommendations, convert_df_to_list, df, model_bert, autoencoder, scaler, features
+from .models import notes as notes_df_global, get_combined_recommendations, convert_df_to_list, df, model_bert, autoencoder, scaler, features
 from django.urls import reverse
 import traceback
 import numpy as np
@@ -15,10 +15,11 @@ def index(request):
     return render(request, "myapp/index.html")
 
 def feature1(request):
-    notes_df = notes.copy()
-    notes_df["Notes"] = notes_df["Notes"].str.replace("_", " ").str.title()
-    notes_name_list = notes_df["Notes"].tolist()
-    context = {"df_notes": notes_df.to_dict(orient='records')}
+    notes_name_list = []
+    if notes_df_global is not None and 'Notes' in notes_df_global.columns:
+        notes_name_list = notes_df_global["Notes"].str.replace("_", " ").str.title().tolist()
+    context = {"df_notes": notes_df_global.to_dict(orient='records') if notes_df_global is not None else [],
+               "notes_name_list": notes_name_list}
 
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
@@ -32,79 +33,71 @@ def feature1(request):
                 description = data.get('description', '')
                 percentages_input = data.get('percentages', {})
                 if not isinstance(percentages_input, dict):
-                    return JsonResponse({'status': 'error', 'message': 'Invalid percentages format (expected dictionary).'}, status=400)
-                for note, perc in percentages_input.items():
-                    if isinstance(perc, (int, float)):
-                        percentages_dict[note] = perc
-                    else:
-                        percentages_dict[note] = 0
+                     return JsonResponse({'status': 'error', 'message': 'Invalid percentages format.'}, status=400)
+                percentages_dict = {k: v for k, v in percentages_input.items() if isinstance(v, (int, float))}
+
+                # DEBUG: Log incoming data from feature2 when Get Recommendations is clicked
+                print("--- FEATURE2 → FEATURE1 AJAX Received ---")
+                print(f"Description: {description}")
+                print(f"Selected Percentages: {percentages_dict}")
 
             else:
                 description = request.POST.get('description', '')
-                for i, note_name in enumerate(notes_name_list):
-                    percentage_key = f'percentage_{i+1}'
-                    percentage_str = request.POST.get(percentage_key)
+                for note_name in notes_name_list:
+                    percentage_val_str = request.POST.get(note_name.replace(" ", "_"))
                     try:
-                        percentage_val = int(percentage_str) if percentage_str else 0
-                        percentages_dict[note_name] = percentage_val
+                        percentages_dict[note_name] = int(percentage_val_str) if percentage_val_str else 0
                     except (ValueError, TypeError):
-                        print(f"Warning: Invalid percentage value for {percentage_key} ({note_name}): {percentage_str}")
                         percentages_dict[note_name] = 0
 
             ordered_percentages = []
             if features:
                 num_expected_features = len(features)
-                print(f"Expected number of features from models.py: {num_expected_features}")
-                print(f"Features order from models.py: {features}")
+                print(f"Expected features order (models.py): {features}")
                 for feature_name in features:
                     normalized_feature_name = feature_name.replace("_", " ").title()
                     percentage_value = percentages_dict.get(normalized_feature_name, 0)
                     ordered_percentages.append(percentage_value)
 
-                print(f"Number of percentages after ordering: {len(ordered_percentages)}")
+                print(f"Input Percentages Dict (from request): {percentages_dict}")
+                print(f"Ordered Percentages List (to model): {ordered_percentages}")
                 if len(ordered_percentages) != num_expected_features:
-                    print(f"Warning: Mismatch between ordered percentages ({len(ordered_percentages)}) and expected features ({num_expected_features}). Padding/truncating may occur in model function.")
-            else:
-                print("Error: 'features' list from models.py is empty. Cannot determine correct percentage order.")
-                if is_ajax:
-                    return JsonResponse({'status': 'error', 'message': 'Model features not loaded correctly.'}, status=500)
-                else:
-                    context['error_message'] = 'Model features not loaded correctly.'
-                    return render(request, "myapp/feature1.html", context)
+                    print(f"Warning: Mismatch ordered percentages ({len(ordered_percentages)}) vs expected features ({num_expected_features}).")
 
-            print("--- Request Data ---")
-            print(f"Description: {description}")
-            print(f"Input Percentages Dict: {percentages_dict}")
-            print(f"Ordered Percentages List (to model): {ordered_percentages}")
-            print(f"Is AJAX: {is_ajax}")
-            print("--------------------")
+            else:
+                print("Error: 'features' list from models.py is empty or not loaded.")
+                if is_ajax:
+                    return JsonResponse({'status': 'error', 'message': 'Model features configuration error.'}, status=500)
+                else:
+                    context['error_message'] = 'Model features configuration error.'
+                    return render(request, "myapp/feature1.html", context)
 
             recommendations_df = get_combined_recommendations(description, ordered_percentages)
 
-            if recommendations_df.empty:
-                print("No recommendations generated by the model.")
-                if is_ajax:
-                    return JsonResponse({'recommendations': []})
-                else:
-                    context['recommendations'] = []
-            else:
+            recommendations = []
+            if recommendations_df is not None and not recommendations_df.empty:
                 recommendations = recommendations_df.to_dict(orient='records')
                 print(f"Generated {len(recommendations)} recommendations.")
-                
-                if is_ajax:
-                    return JsonResponse({'recommendations': recommendations})
-                else:
-                    context['description'] = description
-                    context['input_percentages'] = percentages_dict
-                    context['recommendations'] = recommendations if not recommendations_df.empty else []
-            
-            return render(request, "myapp/feature1.html", context)
+            else:
+                print("No recommendations generated.")
+
+            if is_ajax:
+                 return JsonResponse({'recommendations': recommendations})
+            else:
+                 context['description'] = description
+                 context['input_percentages'] = percentages_dict
+                 context['recommendations'] = recommendations
+                 return render(request, "myapp/feature1.html", context)
 
         except json.JSONDecodeError:
-            print("Error decoding JSON from AJAX request.")
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+             print("Error decoding JSON from AJAX request.")
+             if is_ajax:
+                 return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+             else:
+                 context['error_message'] = 'Invalid data submitted.'
+                 return render(request, "myapp/feature1.html", context)
         except Exception as e:
-            print(f"Error processing request: {e}")
+            print(f"Error processing feature1 request: {e}")
             traceback.print_exc()
             if is_ajax:
                 return JsonResponse({'status': 'error', 'message': 'An internal server error occurred.'}, status=500)
@@ -127,69 +120,101 @@ def process_url(request):
         input_df, numeric_df = insight(url)
 
         if input_df.empty:
-            return JsonResponse({'status': 'error', 'message': 'URL not found.'}, status=404)
+            return JsonResponse({'status': 'error', 'message': 'Perfume data not found for the given URL.'}, status=404)
 
-        request.session['numeric_df'] = numeric_df.to_dict(orient='records')
-        request.session['input_df'] = input_df.to_dict(orient='records')
-        return JsonResponse({'status': 'success', 'message': 'URL diterima.'})
+        numeric_data_formatted = []
+        if not numeric_df.empty:
+            first_numeric_record = numeric_df.iloc[0].to_dict()
+            for col, val in first_numeric_record.items():
+                 formatted_col = col.replace("_", " ").title()
+                 serializable_val = float(val) if isinstance(val, (np.number, np.floating, np.integer)) else val
+                 numeric_data_formatted.append({'col': formatted_col, 'val': serializable_val})
+
+        input_data_dict = {}
+        if not input_df.empty:
+            required_cols = ['Perfume_Name', 'Brand', 'Gender', 'Description', 'Image', 'URL']
+            existing_cols = [col for col in required_cols if col in input_df.columns]
+            input_data_dict = input_df[existing_cols].iloc[0].to_dict()
+            for key, value in input_data_dict.items():
+                if pd.isna(value):
+                    input_data_dict[key] = None
+                elif isinstance(value, (np.datetime64, pd.Timestamp)):
+                     input_data_dict[key] = value.isoformat()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Data retrieved successfully.',
+            'numeric_data': numeric_data_formatted,
+            'input_data': input_data_dict
+        })
 
     except json.JSONDecodeError:
-        return JsonResponse({'status': 'error', 'message': 'Invalid JSON.'}, status=400)
-    except KeyError:
-        return JsonResponse({'status': 'error', 'message': 'URL key is missing.'}, status=400)
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON payload.'}, status=400)
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        print(f"Error in process_url: {type(e).__name__} - {e}")
+        traceback.print_exc()
+        return JsonResponse({'status': 'error', 'message': 'An internal server error occurred while processing the request.'}, status=500)
 
 
 def insight(url):
-    input_df = df[df['URL'] == url]
-    if input_df.empty:
-        return pd.DataFrame(), pd.DataFrame()
+    if df is None or df.empty:
+         print("Error in insight: Main DataFrame 'df' is not loaded.")
+         return pd.DataFrame(), pd.DataFrame()
 
-    numeric_cols = input_df.select_dtypes(include=['number']).columns
-    non_zero_mask = (input_df[numeric_cols] != 0) & (input_df[numeric_cols].notna())
-    filtered_numeric = input_df[numeric_cols].loc[:, non_zero_mask.any(axis=0)]
-    result_df = pd.concat([input_df.drop(columns=numeric_cols), filtered_numeric], axis=1)
-    result_df = result_df.drop(columns=['Unnamed:_0', 'Rating_Value', 'Best_Rating', 'Votes'], errors='ignore')
-    numeric_df = result_df.select_dtypes(include=['number'])
-    return input_df, numeric_df
-    
+    try:
+        input_df = df[df['URL'] == url].copy()
+        if input_df.empty:
+            print(f"Insight: URL '{url}' not found in DataFrame.")
+            return pd.DataFrame(), pd.DataFrame()
+
+        numeric_cols = input_df.select_dtypes(include=np.number).columns
+        cols_to_exclude = ['Rating_Value', 'Best_Rating', 'Votes', 'Unnamed:_0']
+        valid_numeric_cols = [col for col in numeric_cols if col not in cols_to_exclude and col in input_df.columns]
+
+        numeric_subset = input_df[valid_numeric_cols]
+        non_zero_mask = (numeric_subset != 0) & (numeric_subset.notna())
+        filtered_numeric_cols = numeric_subset.loc[:, non_zero_mask.any(axis=0)].columns
+        numeric_df_final = input_df[filtered_numeric_cols]
+
+        return input_df, numeric_df_final
+
+    except KeyError as e:
+         print(f"Error in insight: DataFrame key error - {e}. Available columns: {df.columns.tolist()}")
+         return pd.DataFrame(), pd.DataFrame()
+    except Exception as e:
+         print(f"Unexpected error in insight: {type(e).__name__} - {e}")
+         traceback.print_exc()
+         return pd.DataFrame(), pd.DataFrame()
+
+
 def feature2(request):
-    if request.method == 'POST':
-        return redirect('feature2')
+    df_list = []
+    if df is not None and not df.empty:
+        df_list = convert_df_to_list(df)
 
-    df_list = convert_df_to_list(df)
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(df_list, 100)
+    items_per_page = 100
+    paginator = Paginator(df_list, items_per_page)
     page_obj = paginator.get_page(page_number)
 
-    # Calculate elided page range in the view
-    elided_page_range = paginator.get_elided_page_range(number=page_obj.number, 
-                                                         on_each_side=2, 
-                                                         on_ends=2)
+    elided_page_range = paginator.get_elided_page_range(number=page_obj.number,
+                                                         on_each_side=2,
+                                                         on_ends=1)
 
-    # Retrieve numeric_df data from the session (if it exists)
-    numeric_df_data = request.session.get('numeric_df')
-    input_df_data = request.session.get('input_df')
-    numeric_df = None
-    input_df = None
+    numeric_df_processed = []
+    input_data_dict = None
 
-    if numeric_df_data:
-        numeric_df = pd.DataFrame(numeric_df_data)
-        # Modify the column names *before* passing to the template
-        new_cols = []
-        for col in numeric_df.columns:
-             new_cols.append(col.replace("_", " ").title())
-        numeric_df.columns = new_cols
-    if input_df_data:
-        input_df = pd.DataFrame(input_df_data)
+    all_notes_list = []
+    if notes_df_global is not None and 'Notes' in notes_df_global.columns:
+         all_notes_list = notes_df_global["Notes"].str.replace("_", " ").str.title().tolist()
 
-    # Add elided_page_range to the context
     context = {
         "datas": page_obj.object_list,
         "page_obj": page_obj,
-        "numeric_df": numeric_df,
-        "input_df": input_df,
+        "numeric_df": numeric_df_processed,
+        "input_df": input_data_dict,
         "elided_page_range": elided_page_range,
+        "notes_name_list_json": json.dumps(all_notes_list),
     }
+
     return render(request, "myapp/feature2.html", context)

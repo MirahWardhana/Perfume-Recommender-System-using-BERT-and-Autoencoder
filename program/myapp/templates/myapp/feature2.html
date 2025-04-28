@@ -5,13 +5,13 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- CSRF Token for AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
 
     <!-- Bootstrap CSS -->
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts -->
-    <href="https://fonts.googleapis.com/css2?family=Monoton&family=Rubik:wght@300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <title>Customize Perfume Selection</title>
 
@@ -22,45 +22,58 @@
 
   <body class="no-scrollbar">
     <div style="display: flex; justify-content:center; margin-top:1rem">
-        <h2>Input</h2>
+        <h2>Input Perfume</h2>
     </div>
     <div class="row">
+        <!-- Left Column: Search, Cards, Pagination -->
         <div class="col-12 col-md-6">
             <div class="row" style="display: flex; justify-content: center; align-items: center;">
+                <!-- Search Bar -->
                 <div class="col-sm-12 d-flex align-items-center m-2" style="display: flex; justify-content: center; align-items: center;">
-                    <input class="m-1 search-input" type="search" placeholder="Find a perfume name, brand, notes or description" />
-                    <button type="button" class="btn btn-dark">Search</button>
+                    <input class="m-1 search-input form-control" type="search" placeholder="Find a perfume name, brand, notes or description" aria-label="Search Perfumes" />
+                    <button type="button" class="btn btn-dark ms-1">Search</button>
                 </div>
 
+                <!-- Card Scroll Area -->
                 <div class="col-sm-12 mb-1" style="max-width:100vh; height:70vh; overflow-y:scroll;" id="scroll-style">
                     <div class="row g-0 grid-row">
                         {% for data in datas %}
                         <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="processCardClick('{{ data.URL }}')">
                             <div class="flip-card-inner">
                                 <div class="flip-card-front">
+                                    <!-- Hidden URL for potential future use, though passed to function -->
                                     <h1 style="visibility: hidden; font-size:0; ">{{ data.URL }}</h1>
-                                    <img class="card-img-top" src="{{ data.Image }}" alt="{{ data.Perfume_Name }}">
+                                    <img class="card-img-top" src="{{ data.Image }}" alt="{{ data.Perfume_Name }}" loading="lazy"> {# Added lazy loading #}
                                     <div class="card-body">
                                         <h5 class="card-title">{{ data.Perfume_Name }}</h5>
                                         <p class="card-text">{{ data.Brand }}</p>
                                     </div>
                                 </div>
+                                {# Add Back side if needed for card flip #}
+                                <div class="flip-card-back">
+                                    <h5>{{ data.Perfume_Name }}</h5>
+                                    <p>{{ data.Brand }}</p>
+                                    {# Add more details if desired #}
+                                    <button class="btn btn-sm btn-light" onclick="event.stopPropagation(); processCardClick('{{ data.URL }}');">View Details</button> {# Prevent flip when clicking button #}
+                                </div>
                             </div>
                         </div>
                         {% empty %}
-                        <p>Tidak ada data parfum yang tersedia.</p>
+                        <div class="col-12">
+                            <p class="text-center mt-3">No perfume data available.</p>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
 
-
+            <!-- Pagination -->
             <div class="pagination d-flex justify-content-center mt-3">
                 <nav aria-label="Page navigation">
                     <ul class="pagination pagination-custom">
                         {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                 <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Previous">
                                     <span aria-hidden="true">«</span>
                                 </a>
                             </li>
@@ -75,14 +88,14 @@
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
                             {% else %}
                                 <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                     <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
                                 </li>
                             {% endif %}
                         {% endfor %}
         
                         {% if page_obj.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                 <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Next">
                                     <span aria-hidden="true">»</span>
                                 </a>
                             </li>
@@ -94,233 +107,586 @@
                     </ul>
                 </nav>
             </div>
-            
-            
-
         </div>
 
-
+        <!-- Right Column: Insight/Details Section -->
         <div class="col-12 col-md-6" id="insightDiv">
             <div class="row align-items-center">
+                <!-- Image Column -->
                 <div class="col-12 col-md-4" style="height:50vh; display: flex; align-items: center; justify-content: center;">
-                    <img src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" alt="" style="width: 30vh;">
+                    <!-- Updated default image URL -->
+                    <img id="insightImage" src="https://fimgs.net/mdimg/perfume/375x500.21474.jpg" alt="Selected perfume image" style="width: 80%; max-width: 200px; height: auto; max-height: 45vh; object-fit: contain;">
                 </div>
+                <!-- Notes/Sliders Column -->
                 <div class="col-12 col-md-8" style="height:40vh; display:flex; align-items: center;" >
-                    <div class="table-wrapper container mt-2 table-container" id="scroll-style" style="width:100%;">
-                        
-                        {% if numeric_df %}
-                        <table class="table">
-                            <tbody>
-                                {% for col, val in numeric_df.0.items %}
-                                {% if val > 0 %}
-                                <tr>
-                                    <td>{{ col }}</td>
-                                    <td class="slider-container">
-                                        <input 
-                                            type="range" 
-                                            min="0" 
-                                            max="100" 
-                                            value="{{ val|floatformat:0 }}" 
-                                            class="form-range custom-slider" 
-                                            id="slider{{ forloop.counter }}" 
-                                            oninput="updateSlider({{ forloop.counter }})">
-                                        <span id="sliderPercentage1" class="slider-percentage">{{ val|floatformat:2 }}%</span>
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
+                    <div class="table-wrapper container mt-2 table-container" id="scroll-style" style="width:100%; height: 100%; overflow-y: auto;">
+                         <!-- Notes Table -->
+                        <table class="table table-sm" id="notesTable"> {# Added table-sm #}
+                            <tbody id="notesTableBody">
+                                <!-- Populated by JavaScript -->
+                                <tr><td colspan="2" class="text-center text-muted" id="notesPlaceholder">Click a perfume card to load its notes.</td></tr>
                             </tbody>
                         </table>
-                        {% else %}
-                            <p>Click a perfume card to load data.</p>
-                        {% endif %}
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-md-12" style="height:40vh; display:grid; align-items:center; justify-content:center;">
-                <table class="table">
-                    <tbody>
-                      <tr>
-                        <td>Name</td>
-                        <td>Perfume_Name</td>
+            <!-- Details and Buttons Row -->
+            <div class="row mt-3"> {# Added a row for better structure #}
+                <div class="col-12"> {# Use full width #}
+                    <div style="height:auto; min-height: 25vh; display:flex; flex-direction: column; justify-content: space-between; align-items: center;"> {# Adjusted height and layout #}
+                        <!-- Details Table -->
+                        <table class="table table-sm table-borderless" id="detailsTable" style="width: 90%; margin-bottom: 1rem;"> {# Added table-sm, borderless, width #}
+                            <tbody id="detailsTableBody">
+                               <!-- Populated by JavaScript -->
+                               <tr>
+                                 <td style="width: 25%;"><strong>Name</strong></td>
+                                 <td id="detailName">-</td>
                       </tr>
                       <tr>
-                        <td>Brand</td>
-                        <td>Thornton</td>
+                                 <td><strong>Brand</strong></td>
+                                 <td id="detailBrand">-</td>
                       </tr>
                       <tr>
-                        <td>Gender</td>
-                        <td>the Bird</td>
+                                 <td><strong>Gender</strong></td>
+                                 <td id="detailGender">-</td>
                       </tr>
                       <tr>
-                        <td>Description</td>
-                        <td>the Bird</td>
+                                 <td><strong>Description</strong></td>
+                                 <td id="detailDescription" style="max-height: 80px; overflow-y: auto; display: block;">-</td> {# Make description scrollable #}
                       </tr>
                     </tbody>
                   </table>
 
-                  {% comment %} <button class="btn btn-dark shiny-button m-1 get-recommendations-button" onclick="scrollToTarget()" type="submit">Get Recommendations</button> {% endcomment %}
-                  <span class="button-group">
-                    <button class="btn btn-dark shiny-button m-1 get-recommendations-button" onclick="scrollToTarget()" type="submit">Get Recommendations</button>
+                        <!-- Buttons -->
+                        <div class="button-group text-center mb-2"> {# Centered buttons #}
+                            <button id="getRecommendationsBtn" class="btn btn-dark shiny-button m-1" onclick="collectDataAndRecommend()" type="button" disabled>Get Recommendations</button> {# Disabled initially #}
                     <button class="btn btn-outline-dark m-1 cancel-button" type="button" onclick="window.location.href='{% url 'index' %}'">
-                        Back
+                                Back to Home
                     </button>
-                </span>
-            </div>
-
-        </div>
-    </div>
-
-        <!-- Hasil -->
-    <div id="targetDiv" class="result-section">
-        <!-- Bagian Judul -->
-        <div class="col-12">
-            <h2 class="mt-5 mb-3">Result</h2>
-        </div>
-
-        <!-- Bagian Grid -->
-        <div class="container mt-4 mb-4 result-grid" id="scroll-style">
-            <div class="row g-0 grid-row">
-
-            <!-- Card -->
-            <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        
-                        <!-- Front -->
-                        <div class="flip-card-front">
-                            <img class="card-img-top" src="https://fimgs.net/mdimg/perfume/375x500.75064.jpg" >
-                            <div class="card-body">
-                                <h5 class="card-title">Card title Card title Card title</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="flip-card-back">
-                            <h5>More Info</h5>
-                            <p>Details about this item.</p>
-                        </div>
-
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+        </div>
+        </div> <!-- End Insight Section (Right Column) -->
+    </div> <!-- End Main Row -->
+
+        <!-- Result Section -->
+    <div id="targetDiv" class="result-section container mt-5"> {# Added container class #}
+        <!-- Title -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="mb-3">Recommendations</h2>
+                            </div>
+                        </div>
+
+        <!-- Result Grid -->
+        <div class="row justify-content-center"> {# Center the grid container #}
+            <div class="col-lg-10 col-md-12"> {# Control max width #}
+                <div class="result-grid mb-4" id="scroll-style" style="min-height: 200px; background-color: #f8f9fa; border-radius: 8px; padding: 15px;"> {# Added style #}
+                     <div class="row g-2 grid-row justify-content-center" id="recommendationsGrid"> {# justify-content-center #}
+                         <!-- Recommendation cards will be loaded here by JS -->
+                         <p id="recommendationsPlaceholder" class="text-center text-muted mt-5">Select a perfume and adjust notes, then click "Get Recommendations".</p>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+                        </div>
 
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- JavaScript -->
+    <!-- jQuery first (Bootstrap bundle includes Popper) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="{% static 'myapp/assets/js/feature.js' %}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- Custom JS -->
+    <script>
+        // Global variable to store data of the currently selected perfume
+        let currentPerfumeData = {
+            input: null,
+            notes: null
+        };
+        // Store all possible note names from Django context
+        const ALL_NOTE_NAMES = {{ notes_name_list_json|safe }};
+
+        // Function to get CSRF token from meta tag or cookie
+        function getCsrfToken() {
+            let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (!csrfToken) {
+                // Fallback to cookie if meta tag not found
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith('csrftoken=')) {
+                        csrfToken = decodeURIComponent(cookie.substring('csrftoken='.length));
+                        break;
+                    }
+                }
+            }
+            return csrfToken;
+        }
+
+        // --- Helper functions for color (copied from feature.js) ---
+        function intToHex(value) {
+            var hex = parseInt(value).toString(16); // Ensure value is integer before converting
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+
+        // Membuat warna berdasarkan nilai persentase (0-100)
+        function makeColor(value) {
+            value = Math.min(Math.max(0, parseInt(value)), 100); // Ensure value is integer 0-100
+            var redValue = 255 - Math.round(value * 2.55);
+            var greenValue = Math.round(value * 2.55);
+            return "#" + intToHex(redValue) + intToHex(greenValue) + "00";
+        }
+
+        // --- Card Click Handling ---
+        function processCardClick(url) {
+            console.log("Card clicked, fetching URL:", url);
+            const recommendationsPlaceholder = document.getElementById('recommendationsPlaceholder');
+            const recommendationsGrid = document.getElementById('recommendationsGrid');
+            const getRecBtn = document.getElementById('getRecommendationsBtn');
+
+            // Show loading state? (Optional)
+            resetInsightSection("Loading details..."); // Reset with loading message
+            if(getRecBtn) getRecBtn.disabled = true; // Disable button while loading
+            if(recommendationsGrid) recommendationsGrid.innerHTML = ''; // Clear old recommendations
+            if(recommendationsPlaceholder) {
+                recommendationsPlaceholder.textContent = 'Loading perfume details...';
+                recommendationsPlaceholder.style.display = 'block';
+            }
+
+
+            fetch("{% url 'process_url' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || `Server error: ${response.status}`);
+                    }).catch(() => {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Data received:", data); // Check if data arrives correctly on 2nd click
+                if (data.status === 'success' && data.input_data && data.numeric_data) {
+                    currentPerfumeData.input = data.input_data;
+                    currentPerfumeData.notes = data.numeric_data;
+                    updateInsightSection(currentPerfumeData.input, currentPerfumeData.notes); // Call update
+                    const updatedRecBtn = document.getElementById('getRecommendationsBtn'); // Re-select after potential DOM changes
+                    if(updatedRecBtn) updatedRecBtn.disabled = false; // Enable button
+                    const updatedPlaceholder = document.getElementById('recommendationsPlaceholder');
+                    if(updatedPlaceholder) updatedPlaceholder.textContent = 'Adjust notes if desired, then click "Get Recommendations".';
+                } else {
+                    // This error might occur on 2nd click if data processing fails server-side for some reason
+                    console.error("Received data indicates failure or is incomplete:", data);
+                    throw new Error(data.message || "Failed to retrieve valid perfume data.");
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching or processing perfume details:', error); // More specific error log
+                alert('Error fetching perfume details: ' + error.message);
+                resetInsightSection(); // Reset to default placeholders on error
+                const errorRecBtn = document.getElementById('getRecommendationsBtn');
+                if(errorRecBtn) errorRecBtn.disabled = true;
+                const errorPlaceholder = document.getElementById('recommendationsPlaceholder');
+                 if(errorPlaceholder) errorPlaceholder.textContent = 'Failed to load perfume details.';
+            });
+        }
+
+        // --- Update UI Elements ---
+        function updateInsightSection(inputData, numericData) {
+            console.log("--- updateInsightSection START ---");
+
+            // Update Image
+            const imgElement = document.getElementById('insightImage');
+            if (imgElement) {
+                imgElement.src = inputData.Image || "{% static 'myapp/assets/img/perfume_placeholder.png' %}";
+                imgElement.alt = inputData.Perfume_Name || 'Selected perfume';
+                console.log("Image updated.");
+            } else {
+                console.error("Element 'insightImage' not found!"); // Add error log
+            }
+
+            // Update Details Table
+            const detailName = document.getElementById('detailName');
+            const detailBrand = document.getElementById('detailBrand');
+            const detailGender = document.getElementById('detailGender');
+            const detailDescription = document.getElementById('detailDescription');
+            // Add checks before updating text content
+            if(detailName) detailName.textContent = inputData.Perfume_Name || '-'; else console.error("Element 'detailName' not found!");
+            if(detailBrand) detailBrand.textContent = inputData.Brand || '-'; else console.error("Element 'detailBrand' not found!");
+            if(detailGender) detailGender.textContent = inputData.Gender || '-'; else console.error("Element 'detailGender' not found!");
+            if(detailDescription) detailDescription.textContent = inputData.Description || '-'; else console.error("Element 'detailDescription' not found!");
+            console.log("Details table updated (or attempted).");
+
+            // Update Notes Table (Sliders)
+            const notesTableBody = document.getElementById('notesTableBody');
+            if (!notesTableBody) {
+                 console.error("Notes table body element 'notesTableBody' not found!"); // Crucial check
+                 console.log("--- updateInsightSection END (Error: Table Body Missing) ---");
+                 return; // Stop execution if the table body isn't found
+            }
+            // Clear the table body *before* adding new rows
+            notesTableBody.innerHTML = '';
+            console.log("Cleared notes table body.");
+
+            // --- Refined Slider Creation and Styling ---
+            let slidersToUpdate = []; // Array to store IDs for post-append update
+
+            if (numericData && numericData.length > 0) {
+                console.log(`Processing ${numericData.length} numeric data items.`);
+                let displayedNotesCount = 0;
+
+                // 1. Build HTML String for all rows first
+                let tableBodyHtml = "";
+                numericData.forEach((item, index) => {
+                    const percentageValue = item.val * 100;
+                    if (percentageValue > 0.1) {
+                        displayedNotesCount++;
+                        const sliderId = `sliderDynamic${index}`;
+                        const percentageId = `sliderPercentageDynamic${index}`;
+                        const noteName = item.col;
+                        const initialSliderValue = Math.max(0, Math.min(100, Math.round(percentageValue)));
+
+                        tableBodyHtml += `
+                            <tr>
+                                <td>${noteName}</td>
+                                <td class="slider-container">
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value="${initialSliderValue}"
+                                        class="form-range custom-slider"
+                                        id="${sliderId}"
+                                        data-note-name="${noteName}"
+                                        oninput="updateSliderValue(this, '${percentageId}')">
+                                    <span id="${percentageId}" class="slider-percentage">${percentageValue.toFixed(1)}%</span>
+                                </td>
+                            </tr>
+                        `;
+                        // Store the IDs for later update
+                        slidersToUpdate.push({ sliderId: sliderId, percentageId: percentageId });
+                    }
+                });
+
+                // 2. Set the innerHTML once
+                if (displayedNotesCount > 0) {
+                     notesTableBody.innerHTML = tableBodyHtml;
+                     console.log(`Set innerHTML for ${displayedNotesCount} sliders.`);
+                } else {
+                    console.log("No significant notes found, adding placeholder.");
+                    notesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted" id="notesPlaceholder">No significant notes data found for this perfume.</td></tr>';
+                }
+
+
+                // 3. Update Styles After Setting InnerHTML (allowing DOM to potentially update)
+                // Use a minimal timeout to ensure DOM has likely updated
+                setTimeout(() => {
+                    console.log(`Attempting to update styles for ${slidersToUpdate.length} sliders after timeout.`);
+                    slidersToUpdate.forEach(ids => {
+                        const sliderElement = document.getElementById(ids.sliderId);
+                        if (sliderElement) {
+                            updateSliderValue(sliderElement, ids.percentageId); // Apply initial color/text
+                        } else {
+                            // This log is crucial!
+                            console.error(`Could not find slider ${ids.sliderId} after setting innerHTML and timeout.`);
+                        }
+                    });
+                     console.log("Finished updating slider styles after timeout.");
+                }, 0); // 0ms timeout often yields to the browser's rendering cycle
+
+
+            } else {
+                console.log("No numeric data available, adding placeholder.");
+                notesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted" id="notesPlaceholder">No notes data available for this perfume.</td></tr>';
+            }
+             console.log("--- updateInsightSection END ---");
+        }
+
+        function resetInsightSection(message = "Click a perfume card to load its notes.") {
+            console.log("--- resetInsightSection START ---");
+            const imgElement = document.getElementById('insightImage');
+            if(imgElement) {
+                // Update the reset function to use the new default URL
+                imgElement.src = "https://fimgs.net/mdimg/perfume/375x500.21474.jpg";
+                imgElement.alt = 'Selected perfume image';
+            } else { console.error("Reset: Element 'insightImage' not found!");}
+
+            const detailName = document.getElementById('detailName');
+            const detailBrand = document.getElementById('detailBrand');
+            const detailGender = document.getElementById('detailGender');
+            const detailDescription = document.getElementById('detailDescription');
+            if(detailName) detailName.textContent = '-'; else console.error("Reset: Element 'detailName' not found!");
+            if(detailBrand) detailBrand.textContent = '-'; else console.error("Reset: Element 'detailBrand' not found!");
+            if(detailGender) detailGender.textContent = '-'; else console.error("Reset: Element 'detailGender' not found!");
+            if(detailDescription) detailDescription.textContent = '-'; else console.error("Reset: Element 'detailDescription' not found!");
+
+            const notesTableBody = document.getElementById('notesTableBody');
+            if(notesTableBody) {
+                notesTableBody.innerHTML = `<tr><td colspan="2" class="text-center text-muted" id="notesPlaceholder">${message}</td></tr>`;
+            } else { console.error("Reset: Element 'notesTableBody' not found!"); }
+
+
+            currentPerfumeData = { input: null, notes: null }; // Clear stored data
+            const getRecBtn = document.getElementById('getRecommendationsBtn');
+            if(getRecBtn) getRecBtn.disabled = true; else console.error("Reset: Element 'getRecommendationsBtn' not found!");
+            console.log("--- resetInsightSection END ---");
+        }
+
+        // --- Modified updateSliderValue to include color styling ---
+        function updateSliderValue(slider, percentageId) {
+            const percentageSpan = document.getElementById(percentageId);
+            if (slider && percentageSpan) {
+                const value = slider.value;
+                const color = makeColor(value); // Calculate color based on slider value (0-100)
+
+                // Update display text
+                percentageSpan.textContent = value + '%';
+
+                // Update slider background color gradient
+                slider.style.background = `linear-gradient(to right, ${color} ${value}%, #ddd ${value}%)`;
+            }
+        }
+        // --- End Modified updateSliderValue ---
+
+
+        // --- Recommendation Logic ---
+        function collectDataAndRecommend() {
+            if (!currentPerfumeData.input) {
+                 alert("Please select a perfume first.");
+                 return;
+            }
+
+            const getRecBtn = document.getElementById('getRecommendationsBtn');
+            const recommendationsPlaceholder = document.getElementById('recommendationsPlaceholder');
+            const recommendationsGrid = document.getElementById('recommendationsGrid');
+
+            // Disable button and show loading state
+            getRecBtn.disabled = true;
+            getRecBtn.textContent = 'Getting Recommendations...';
+            recommendationsGrid.innerHTML = ''; // Clear previous results
+            recommendationsPlaceholder.textContent = 'Generating recommendations...';
+            recommendationsPlaceholder.style.display = 'block';
+
+
+            // 1. Get Description from the currently loaded perfume
+            const description = currentPerfumeData.input.Description || '';
+
+            // 2. Get Percentages from the *current* slider values, converting back to 0-1 range
+            const percentages = {};
+            const notesTableBody = document.getElementById('notesTableBody');
+            const sliders = notesTableBody.querySelectorAll('input[type="range"]');
+
+            // Populate percentages from visible sliders
+            sliders.forEach(slider => {
+                 const noteName = slider.getAttribute('data-note-name'); // Get name from data attribute
+                 if (noteName) {
+                     // Divide slider value by 100 to convert back to 0-1 range for backend
+                    percentages[noteName] = parseInt(slider.value, 10) / 100.0;
+                 }
+            });
+
+            // Add all other possible notes (from ALL_NOTE_NAMES) with a value of 0
+            // if they weren't already included by a slider.
+            ALL_NOTE_NAMES.forEach(noteName => {
+                 if (!(noteName in percentages)) {
+                     percentages[noteName] = 0.0; // Send 0.0 for notes not present
+                 }
+             });
+
+            console.log("Sending Description:", description);
+            console.log("Sending Percentages (0-1 range):", percentages); // Log the converted values
+
+            // 3. Send data to recommendation endpoint (feature1 URL)
+             fetch("{% url 'feature1' %}", { // Use feature1 endpoint for combined recommendations
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                     'X-CSRFToken': getCsrfToken(),
+                     'X-Requested-With': 'XMLHttpRequest'
+                 },
+                 body: JSON.stringify({
+                     description: description,
+                     percentages: percentages // Send the dictionary with values in 0-1 range
+                 })
+             })
+             .then(response => {
+                 if (!response.ok) {
+                     return response.json().then(err => { throw new Error(err.message || 'Recommendation request failed'); });
+                 }
+                 return response.json();
+             })
+             .then(data => {
+                 console.log("Recommendations received:", data);
+                 displayRecommendations(data.recommendations || []); // Pass empty array if undefined
+                 scrollToTarget(); // Scroll after displaying
+             })
+             .catch(error => {
+                 console.error('Error getting recommendations:', error);
+                 alert('Error getting recommendations: ' + error.message);
+                 displayRecommendations([]); // Clear grid on error
+             })
+             .finally(() => {
+                 // Re-enable button and reset text
+                 getRecBtn.disabled = false;
+                 getRecBtn.textContent = 'Get Recommendations';
+             });
+         }
+
+         function displayRecommendations(recommendations) {
+            const grid = document.getElementById('recommendationsGrid');
+            const placeholder = document.getElementById('recommendationsPlaceholder');
+            grid.innerHTML = ''; // Clear previous results or placeholder
+
+            if (!recommendations || recommendations.length === 0) {
+                placeholder.textContent = 'No recommendations found for the current criteria.';
+                placeholder.style.display = 'block';
+                return; // Exit function
+            }
+
+            placeholder.style.display = 'none'; // Hide placeholder if we have results
+
+            recommendations.forEach(rec => {
+                const cardHtml = `
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-3"> {# Responsive column classes #}
+                        <div class="card h-100 flip-card card-wrapper recommendation-card"> {# Added h-100 and class #}
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                                    <img class="card-img-top" src="${rec.Image || "{% static 'myapp/assets/img/perfume_placeholder.png' %}"}" alt="${rec.Perfume_Name || 'Perfume'}" loading="lazy">
+                            <div class="card-body">
+                                        <h6 class="card-title">${rec.Perfume_Name || 'N/A'}</h6> {# Use h6 for smaller title #}
+                                        <p class="card-text mb-1"><small>${rec.Brand || 'N/A'}</small></p>
+                                        <p class="card-text mb-1"><small>Gender: ${rec.Gender || 'N/A'}</small></p>
+                                        ${rec.Combined_Similarity_Score ? `<p class="card-text"><small>Score: ${rec.Combined_Similarity_Score.toFixed(3)}</small></p>` : ''}
+                            </div>
+                        </div>
+                        <div class="flip-card-back">
+                                    <h6 class="mt-2">Description</h6>
+                                    <p class="description-back">${rec.Description || 'No description available.'}</p>
+                                    {# Add button to select this recommendation for further refinement? #}
+                    </div>
+                </div>
+            </div>
+        </div>
+                `;
+                // Append the card HTML string directly (less safe but simpler for this structure)
+                // Or create elements properly:
+                const tempDiv = document.createElement('div');
+                // Need to wrap in the column div structure expected by the grid
+                tempDiv.innerHTML = cardHtml.trim();
+                const cardElement = tempDiv.firstChild;
+
+                if(cardElement){
+                    // Add click listener to the card *element* for flipping
+                    const flipCardDiv = cardElement.querySelector('.recommendation-card');
+                     if(flipCardDiv) {
+                        flipCardDiv.onclick = function() { this.classList.toggle('flipped'); };
+                    }
+                    grid.appendChild(cardElement);
+                }
+            });
+        }
+
+        // Function to scroll to target div (results)
+        function scrollToTarget() {
+            const targetDiv = document.getElementById('targetDiv');
+            if (targetDiv) {
+                targetDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Initialize page state
+        document.addEventListener('DOMContentLoaded', function() {
+            resetInsightSection(); // Start with placeholders
+        });
+
+    </script>
+
+    <style>
+        /* --- Pagination Customization --- */
+        .pagination-custom .page-link {
+            color: #343a40; /* Dark grey text for links */
+            border-color: #dee2e6; /* Standard border color */
+        }
+
+        .pagination-custom .page-link:hover {
+            color: #000; /* Black text on hover */
+            background-color: #e9ecef; /* Light grey background on hover */
+            border-color: #dee2e6;
+        }
+
+        .pagination-custom .page-item.active .page-link {
+            z-index: 3;
+            color: #fff; /* White text for active page */
+            background-color: #000; /* Black background for active page */
+            border-color: #000; /* Black border for active page */
+        }
+
+        .pagination-custom .page-item.disabled .page-link {
+            color: #6c757d; /* Muted grey for disabled links */
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+        /* --- End Pagination Customization --- */
+
+
+        /* Basic styles for recommendation card back */
+        .recommendation-card .flip-card-back {
+            padding: 10px;
+            background-color: #e9ecef; /* Light background */
+            color: #333;
+            overflow-y: auto; /* Allow scrolling if content overflows */
+            font-size: 0.85rem;
+        }
+        .recommendation-card .flip-card-back h6 {
+             margin-bottom: 5px;
+        }
+        .recommendation-card .flip-card-back p.description-back {
+            max-height: 150px; /* Limit description height */
+            overflow-y: auto;
+             margin-bottom: 0;
+        }
+        /* Ensure recommendation cards maintain aspect ratio/height */
+        .recommendation-card .card-img-top {
+            aspect-ratio: 3 / 4; /* Common aspect ratio for perfume bottles */
+            object-fit: contain; /* Scale image nicely */
+             width: 100%; /* Take full width of card */
+             max-height: 180px; /* Limit image height */
+        }
+         .recommendation-card .card-body {
+             padding: 0.75rem; /* Slightly reduce padding */
+             font-size: 0.9rem;
+         }
+         .recommendation-card .card-title {
+             font-size: 1rem; /* Adjust title size */
+             margin-bottom: 0.25rem;
+         }
+         .recommendation-card p.card-text {
+             margin-bottom: 0.1rem; /* Reduce space between text lines */
+         }
+
+         /* Style for description in details table */
+         #detailDescription {
+             font-size: 0.9em;
+             line-height: 1.4;
+             background-color: #f8f9fa;
+             padding: 5px 8px;
+             border-radius: 4px;
+             border: 1px solid #dee2e6;
+         }
+    </style>
+
   </body>
-
 </html>
