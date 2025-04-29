@@ -24,11 +24,6 @@ def feature1(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     if request.method == 'POST':
-        # Debug: print raw request data and AJAX flag
-        print("=== FEATURE1 POST RECEIVED (Feature2 AJAX) ===")
-        print("AJAX flag:", is_ajax)
-        print("Raw request body:", request.body)
-        print("Request headers:", dict(request.headers))
         try:
             description = ''
             percentages_dict = {}

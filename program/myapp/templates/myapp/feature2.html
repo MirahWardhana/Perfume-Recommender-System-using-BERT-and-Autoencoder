@@ -161,7 +161,9 @@
                         <!-- Buttons -->
                         <div class="button-group text-center mb-2"> {# Centered buttons #}
                             <button id="getRecommendationsBtn" class="btn btn-dark shiny-button m-1" onclick="collectDataAndRecommend()" type="button" disabled>Get Recommendations</button> {# Disabled initially #}
-                    <a class="btn btn-outline-dark m-1 cancel-button" href="{% url 'index' %}">Back to Home</a>
+                    <button class="btn btn-outline-dark m-1 cancel-button" type="button" onclick="window.location.href='{% url 'index' %}'">
+                                Back to Home
+                    </button>
             </div>
         </div>
     </div>
@@ -170,22 +172,27 @@
     </div> <!-- End Main Row -->
 
         <!-- Result Section -->
-    <div id="targetDiv" class="result-section container mt-5">
+    <div id="targetDiv" class="result-section container mt-5"> {# Added container class #}
+        <!-- Title -->
         <div class="row">
-            <div class="col-12 text-center"><h2>Recommendations</h2></div>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-md-12">
-                <div class="result-grid mb-4">
-                    <!-- Placeholder and recommendations grid -->
-                    <p id="recommendationsPlaceholder" class="text-center text-muted mt-5">
-                        Select a perfume and click "Get Recommendations".
-                    </p>
-                    <div class="row g-2 grid-row justify-content-center" id="recommendationsGrid"></div>
+            <div class="col-12 text-center">
+                <h2 class="mb-3">Recommendations</h2>
+                            </div>
+                        </div>
+
+        <!-- Result Grid -->
+        <div class="row justify-content-center"> {# Center the grid container #}
+            <div class="col-lg-10 col-md-12"> {# Control max width #}
+                <div class="result-grid mb-4" id="scroll-style" style="min-height: 200px; background-color: #f8f9fa; border-radius: 8px; padding: 15px;"> {# Added style #}
+                     <div class="row g-2 grid-row justify-content-center" id="recommendationsGrid"> {# justify-content-center #}
+                         <!-- Recommendation cards will be loaded here by JS -->
+                         <p id="recommendationsPlaceholder" class="text-center text-muted mt-5">Select a perfume and adjust notes, then click "Get Recommendations".</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
+                            </div>
+                        </div>
+
 
     <!-- JavaScript -->
     <!-- jQuery first (Bootstrap bundle includes Popper) -->
@@ -200,7 +207,7 @@
             notes: null
         };
         // Store all possible note names from Django context
-        const ALL_NOTE_NAMES = JSON.parse(`{{ notes_name_list_json|escapejs }}`);
+        const ALL_NOTE_NAMES = {{ notes_name_list_json|safe }};
 
         // Function to get CSRF token from meta tag or cookie
         function getCsrfToken() {
@@ -240,14 +247,15 @@
             const recommendationsGrid = document.getElementById('recommendationsGrid');
             const getRecBtn = document.getElementById('getRecommendationsBtn');
 
-            // Reset detail panel and clear recommendations
-            resetInsightSection("Loading details...");
-            if (getRecBtn) getRecBtn.disabled = true;
-            if (recommendationsGrid) recommendationsGrid.innerHTML = '';
-            if (recommendationsPlaceholder) {
+            // Show loading state? (Optional)
+            resetInsightSection("Loading details..."); // Reset with loading message
+            if(getRecBtn) getRecBtn.disabled = true; // Disable button while loading
+            if(recommendationsGrid) recommendationsGrid.innerHTML = ''; // Clear old recommendations
+            if(recommendationsPlaceholder) {
                 recommendationsPlaceholder.textContent = 'Loading perfume details...';
                 recommendationsPlaceholder.style.display = 'block';
             }
+
 
             fetch("{% url 'process_url' %}", {
                 method: 'POST',
@@ -283,10 +291,6 @@
                     console.error("Received data indicates failure or is incomplete:", data);
                     throw new Error(data.message || "Failed to retrieve valid perfume data.");
                 }
-            })
-            .then(() => {
-                const btn = document.getElementById('getRecommendationsBtn');
-                console.log('Button disabled?', btn.disabled);
             })
             .catch(error => {
                 console.error('Error fetching or processing perfume details:', error); // More specific error log
@@ -460,24 +464,21 @@
         // --- Recommendation Logic ---
         function collectDataAndRecommend() {
             if (!currentPerfumeData.input) {
-                alert("Please select a perfume first.");
-                return;
+                 alert("Please select a perfume first.");
+                 return;
             }
+
+            const getRecBtn = document.getElementById('getRecommendationsBtn');
+            const recommendationsPlaceholder = document.getElementById('recommendationsPlaceholder');
+            const recommendationsGrid = document.getElementById('recommendationsGrid');
 
             // Disable button and show loading state
-            const getRecBtn = document.getElementById('getRecommendationsBtn');
-            const recommendationsGrid = document.getElementById('recommendationsGrid');
-            const recommendationsPlaceholder = document.getElementById('recommendationsPlaceholder');
+            getRecBtn.disabled = true;
+            getRecBtn.textContent = 'Getting Recommendations...';
+            recommendationsGrid.innerHTML = ''; // Clear previous results
+            recommendationsPlaceholder.textContent = 'Generating recommendations...';
+            recommendationsPlaceholder.style.display = 'block';
 
-            if (getRecBtn) {
-                getRecBtn.disabled = true;
-                getRecBtn.textContent = 'Getting Recommendations...';
-            }
-            if (recommendationsGrid) recommendationsGrid.innerHTML = '';
-            if (recommendationsPlaceholder) {
-                recommendationsPlaceholder.textContent = 'Generating recommendations...';
-                recommendationsPlaceholder.style.display = 'block';
-            }
 
             // 1. Get Description from the currently loaded perfume
             const description = currentPerfumeData.input.Description || '';
@@ -504,9 +505,8 @@
                  }
              });
 
-             console.log("--- Sending data from Feature 2 ---");
-             console.log("Sending Description:", description);
-             console.log("Sending Percentages (0-1 range):", percentages);
+            console.log("Sending Description:", description);
+            console.log("Sending Percentages (0-1 range):", percentages); // Log the converted values
 
             // 3. Send data to recommendation endpoint (feature1 URL)
              fetch("{% url 'feature1' %}", { // Use feature1 endpoint for combined recommendations
@@ -539,52 +539,62 @@
              })
              .finally(() => {
                  // Re-enable button and reset text
-                 if (getRecBtn) {
-                     getRecBtn.disabled = false;
-                     getRecBtn.textContent = 'Get Recommendations';
-                 }
+                 getRecBtn.disabled = false;
+                 getRecBtn.textContent = 'Get Recommendations';
              });
          }
 
          function displayRecommendations(recommendations) {
             const grid = document.getElementById('recommendationsGrid');
             const placeholder = document.getElementById('recommendationsPlaceholder');
-            // Clear previous cards
-            if (grid) grid.innerHTML = '';
-            // No recommendations
+            grid.innerHTML = ''; // Clear previous results or placeholder
+
             if (!recommendations || recommendations.length === 0) {
-                if (placeholder) {
-                    placeholder.textContent = 'No recommendations found.';
-                    placeholder.style.display = 'block';
-                }
-                return;
+                placeholder.textContent = 'No recommendations found for the current criteria.';
+                placeholder.style.display = 'block';
+                return; // Exit function
             }
-            // Hide placeholder
-            if (placeholder) placeholder.style.display = 'none';
-            // Render each recommendation using the same flip-card markup as feature1
+
+            placeholder.style.display = 'none'; // Hide placeholder if we have results
+
             recommendations.forEach(rec => {
                 const cardHtml = `
-                    <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
-                        <div class="flip-card-inner">
-                            <!-- Front -->
-                            <div class="flip-card-front">
-                                <img class="card-img-top" src="${rec.Image}" alt="${rec.Perfume_Name}">
-                                <div class="card-body">
-                                    <h5 class="card-title">${rec.Perfume_Name}</h5>
-                                    <p class="card-text">${rec.Brand}</p>
-                                    <p class="card-text">${rec.Gender}</p>
-                                </div>
-                            </div>
-                            <!-- Back -->
-                            <div class="flip-card-back">
-                                <h5>More Info</h5>
-                                <a href="${rec.URL}" target="_blank" rel="noopener noreferrer">
-                                    View on Fragrantica
-                                </a>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-3"> {# Responsive column classes #}
+                        <div class="card h-100 flip-card card-wrapper recommendation-card"> {# Added h-100 and class #}
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                                    <img class="card-img-top" src="${rec.Image || "{% static 'myapp/assets/img/perfume_placeholder.png' %}"}" alt="${rec.Perfume_Name || 'Perfume'}" loading="lazy">
+                            <div class="card-body">
+                                        <h6 class="card-title">${rec.Perfume_Name || 'N/A'}</h6> {# Use h6 for smaller title #}
+                                        <p class="card-text mb-1"><small>${rec.Brand || 'N/A'}</small></p>
+                                        <p class="card-text mb-1"><small>Gender: ${rec.Gender || 'N/A'}</small></p>
+                                        ${rec.Combined_Similarity_Score ? `<p class="card-text"><small>Score: ${rec.Combined_Similarity_Score.toFixed(3)}</small></p>` : ''}
                             </div>
                         </div>
-                    </div>`;
-                if (grid) grid.insertAdjacentHTML('beforeend', cardHtml);
+                        <div class="flip-card-back">
+                                    <h6 class="mt-2">Description</h6>
+                                    <p class="description-back">${rec.Description || 'No description available.'}</p>
+                                    {# Add button to select this recommendation for further refinement? #}
+                    </div>
+                </div>
+            </div>
+        </div>
+                `;
+                // Append the card HTML string directly (less safe but simpler for this structure)
+                // Or create elements properly:
+                const tempDiv = document.createElement('div');
+                // Need to wrap in the column div structure expected by the grid
+                tempDiv.innerHTML = cardHtml.trim();
+                const cardElement = tempDiv.firstChild;
+
+                if(cardElement){
+                    // Add click listener to the card *element* for flipping
+                    const flipCardDiv = cardElement.querySelector('.recommendation-card');
+                     if(flipCardDiv) {
+                        flipCardDiv.onclick = function() { this.classList.toggle('flipped'); };
+                    }
+                    grid.appendChild(cardElement);
+                }
             });
         }
 
