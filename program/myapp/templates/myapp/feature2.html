@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <title>Customize Perfume Selection</title>
-    <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.webp' %}">
+    <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.png' %}">
 
     <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{% static 'myapp/assets/css/feature.css' %}">
@@ -565,12 +565,17 @@
                 }
                 return;
             }
+
             // Hide placeholder
             if (placeholder) placeholder.style.display = 'none';
+
+            // Get top 10 recommendations starting from index 1 (second item)
+            const topRecommendations = recommendations.slice(1, 11);
+
             // Render each recommendation using the same flip-card markup as feature1
-            recommendations.forEach(rec => {
+            topRecommendations.forEach(rec => {
                 // Format the score
-                const score = rec.Combined_Similarity_Score ? (parseFloat(rec.Combined_Similarity_Score) * 100).toFixed(1) : 'N/A'; // Multiply by 100 and format
+                const score = rec.Combined_Similarity_Score ? (parseFloat(rec.Combined_Similarity_Score) * 100).toFixed(1) : 'N/A';
 
                 const cardHtml = `
                     <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
@@ -582,7 +587,6 @@
                                     <h5 class="card-title">${rec.Perfume_Name}</h5>
                                     <p class="card-text">${rec.Brand}</p>
                                     <p class="card-text">${rec.Gender}</p>
-                                    {# Add Similarity Score #}
                                     <p class="card-text score-text">
                                         Score: ${score}%
                                     </p>
@@ -711,18 +715,22 @@
     </style>
 
     <style>
-        /* Responsive: Card lebih panjang di mobile */
+        /* Responsive: Card input produk dan hasil rekomendasi lebih panjang di mobile */
         @media (max-width: 576px) {
+            #scroll-style .card-wrapper,
+            #scroll-style .flip-card-front,
             #recommendationsGrid .card-wrapper,
             #recommendationsGrid .flip-card-front {
                 min-height: 220px;
                 height: 220px;
                 max-width: 95vw;
             }
+            #scroll-style .card-img-top,
             #recommendationsGrid .card-img-top {
                 max-height: 110px;
                 object-fit: contain;
             }
+            #scroll-style .card-body,
             #recommendationsGrid .card-body {
                 padding: 0.5rem 0.25rem;
             }

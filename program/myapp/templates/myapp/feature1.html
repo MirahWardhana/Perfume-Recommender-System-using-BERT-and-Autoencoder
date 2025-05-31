@@ -15,7 +15,7 @@
     rel="stylesheet">
 
     <title>Customize Notes and Description</title>
-    <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.webp' %}">
+    <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.png' %}">
 
     <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{% static 'myapp/assets/css/feature.css' %}">
@@ -43,16 +43,16 @@
                             <td>{{ note_item.Notes|title }}</td>
                             <td class="slider-container">
                                 <input
-                                    name="percentage_{{ forloop.counter }}"
+                                    name="{{ note_item.Notes }}"
                                     type="range"
                                     min="0"
                                     max="100"
-                                    value="{% if input_percentages %}{{ input_percentages|get_item:note_item.Notes|title }}{% else %}0{% endif %}"
+                                    value="{% if input_percentages and note_item.Notes in input_percentages %}{{ input_percentages|get_item:note_item.Notes }}{% else %}0{% endif %}"
                                     class="form-range custom-slider"
                                     id="slider{{ forloop.counter }}"
                                     oninput="updateSliderDisplay({{ forloop.counter }})">
                                 <span id="sliderPercentage{{ forloop.counter }}" class="slider-percentage">
-                                    {% if input_percentages %}{{ input_percentages|get_item:note_item.Notes|title }}{% else %}0{% endif %}%
+                                    {% if input_percentages and note_item.Notes in input_percentages %}{{ input_percentages|get_item:note_item.Notes }}{% else %}0{% endif %}%
                                 </span>
                             </td>
                         </tr>
@@ -70,7 +70,7 @@
                             <h2>Description</h2>
                             <textarea class="no-scrollbar description-input" id="prediction-input" name="description"
                             rows="5" spellcheck="false"
-                            placeholder="Enter a description">{{ description }}</textarea>
+                            placeholder="Enter a description">{% if description %}{{ description }}{% endif %}</textarea>
                         </div>
                     </div>
                     <div class="col-sm-12 button-section">
@@ -225,6 +225,12 @@
                  /* Note: Bootstrap's .container already has max-width. These margins will further constrain it. */
                  /* You might need to adjust the percentage depending on the container's max-width */
             }
+        }
+
+        #scroll-style,
+        .result-grid,
+        #recommendationsGrid {
+            overflow-x: hidden !important;
         }
 
     </style>

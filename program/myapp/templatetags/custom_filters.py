@@ -6,15 +6,15 @@ register = template.Library()
 def get_item(dictionary, key):
     if not dictionary:
         return 0
-    # Try to get the value directly
+    # Try direct
     value = dictionary.get(key)
     if value is not None:
         return value
-    # If not found, try with the key in lowercase
+    # Try lower
     value = dictionary.get(key.lower())
     if value is not None:
         return value
-    # If still not found, try with the key in title case
+    # Try title
     value = dictionary.get(key.title())
     if value is not None:
         return value

@@ -36,15 +36,11 @@ def feature1(request):
                      return JsonResponse({'status': 'error', 'message': 'Invalid percentages format.'}, status=400)
                 percentages_dict = {k: v for k, v in percentages_input.items() if isinstance(v, (int, float))}
 
-                # DEBUG: Log incoming data from feature2 when Get Recommendations is clicked
-                print("--- FEATURE2 → FEATURE1 AJAX Received ---")
-                print(f"Description: {description}")
-                print(f"Selected Percentages: {percentages_dict}")
-
             else:
                 description = request.POST.get('description', '')
-                for note_name in notes_name_list:
-                    percentage_val_str = request.POST.get(note_name.replace(" ", "_"))
+                for note_item in notes_df_global.to_dict(orient='records'):
+                    note_name = note_item['Notes']
+                    percentage_val_str = request.POST.get(note_name)
                     try:
                         percentages_dict[note_name] = int(percentage_val_str) if percentage_val_str else 0
                     except (ValueError, TypeError):
@@ -53,16 +49,9 @@ def feature1(request):
             ordered_percentages = []
             if features:
                 num_expected_features = len(features)
-                print(f"Expected features order (models.py): {features}")
                 for feature_name in features:
-                    normalized_feature_name = feature_name.replace("_", " ").title()
-                    percentage_value = percentages_dict.get(normalized_feature_name, 0)
+                    percentage_value = percentages_dict.get(feature_name, 0)
                     ordered_percentages.append(percentage_value)
-
-                print(f"Input Percentages Dict (from request): {percentages_dict}")
-                print(f"Ordered Percentages List (to model): {ordered_percentages}")
-                if len(ordered_percentages) != num_expected_features:
-                    print(f"Warning: Mismatch ordered percentages ({len(ordered_percentages)}) vs expected features ({num_expected_features}).")
 
             else:
                 print("Error: 'features' list from models.py is empty or not loaded.")
@@ -77,9 +66,6 @@ def feature1(request):
             recommendations = []
             if recommendations_df is not None and not recommendations_df.empty:
                 recommendations = recommendations_df.to_dict(orient='records')
-                print(f"Generated {len(recommendations)} recommendations.")
-            else:
-                print("No recommendations generated.")
 
             if is_ajax:
                  return JsonResponse({'recommendations': recommendations})
@@ -90,7 +76,6 @@ def feature1(request):
                  return render(request, "myapp/feature1.html", context)
 
         except json.JSONDecodeError:
-             print("Error decoding JSON from AJAX request.")
              if is_ajax:
                  return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
              else:
