@@ -1,0 +1,19 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.log
+# db.sqlite3
+.vscode/
+.idea/
+media/
+# staticfiles/ # Only ignore if you are collecting static files during the build/deployment process on GCP
+# .dockerignore
+*.pyo
+*.pyd
+.Python
+env/
+.git/
+.gitignore
+.dockerignore
+README.md

@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import tensorflow as tf
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 import joblib
 import os
 
@@ -36,19 +36,88 @@ except Exception as e:
 
 
 notes_list = [
-    'rubber', 'violet', 'citrus', 'foresty', 'vinyl', 'green', 'camphor',
-    'clay', 'ozonic', 'bitter', 'lactonic', 'wine', 'chocolate', 'paper',
-    'lavender', 'musky', 'sour', 'earthy', 'terpenic', 'Pear', 'oud',
-    'cannabis', 'salty', 'coffee', 'metallic', 'almond', 'oily', 'herbal',
-    'smoky', 'balsamic', 'conifer', 'tennis ball', 'alcohol', 'aquatic',
-    'woody', 'leather', 'tropical', 'industrial glue', 'vanilla', 'beeswax',
-    'amber', 'rose', 'coca-cola', 'cherry', 'nutty', 'tobacco', 'whiskey',
-    'soapy', 'fresh', 'brown scotch tape', 'asphault', 'rum', 'mineral',
-    'aldehydic', 'iris', 'plastic', 'warm spicy', 'marine', 'anis',
-    'tuberose', 'aromatic', 'Champagne', 'savory', 'fresh spicy', 'sand',
-    'powdery', 'cinnamon', 'cacao', 'yellow floral', 'coconut', 'sweet',
-    'vodka', 'honey', 'white floral', 'sake', 'fruity', 'patchouli',
-    'soft spicy', 'floral', 'mossy', 'caramel', 'animalic'
+    'woody',
+ 'citrus',
+ 'sweet',
+ 'powdery',
+ 'floral',
+ 'fruity',
+ 'aromatic',
+ 'white floral',
+ 'warm spicy',
+ 'fresh spicy',
+ 'amber',
+ 'musky',
+ 'vanilla',
+ 'fresh',
+ 'green',
+ 'rose',
+ 'earthy',
+ 'patchouli',
+ 'balsamic',
+ 'soft spicy',
+ 'aquatic',
+ 'animalic',
+ 'leather',
+ 'lavender',
+ 'iris',
+ 'violet',
+ 'tropical',
+ 'herbal',
+ 'yellow floral',
+ 'oud',
+ 'ozonic',
+ 'lactonic',
+ 'smoky',
+ 'mossy',
+ 'tuberose',
+ 'marine',
+ 'cinnamon',
+ 'aldehydic',
+ 'caramel',
+ 'almond',
+ 'coconut',
+ 'nutty',
+ 'honey',
+ 'tobacco',
+ 'salty',
+ 'cherry',
+ 'anis',
+ 'coffee',
+ 'cacao',
+ 'metallic',
+ 'chocolate',
+ 'rum',
+ 'soapy',
+ 'sour',
+ 'conifer',
+ 'mineral',
+ 'camphor',
+ 'savory',
+ 'beeswax',
+ 'sand',
+ 'whiskey',
+ 'Champagne',
+ 'bitter',
+ 'terpenic',
+ 'wine',
+ 'alcohol',
+ 'cannabis',
+ 'vodka',
+ 'coca-cola',
+ 'oily',
+ 'clay',
+ 'vinyl',
+ 'asphault',
+ 'tennis ball',
+ 'industrial glue',
+ 'plastic',
+ 'brown scotch tape',
+ 'rubber',
+ 'foresty',
+ 'sake',
+ 'paper',
+ 'Pear'
 ]
 notes = pd.DataFrame({'Notes': notes_list})
 notes['percentage'] = 0
@@ -118,7 +187,7 @@ try: # Tambahkan try-except block
                     print(f"Any Inf in X after replace? {np.isinf(X).values.any()}")
 
 
-                    X_scaled = scaler.transform(X) # Lakukan scaling
+                    X_scaled = scaler.transform(X.values) # Lakukan scaling
                     print("Data scaling successful.")
                     perfume_encodings = autoencoder.predict(X_scaled)
                     print(f"Perfume encodings calculated. Shape: {perfume_encodings.shape}")
@@ -242,7 +311,21 @@ else:
 
 # Remove bert_recommend and recommend_autoencoder as they are replaced
 
-# models.py
+# Fungsi get_combined_recommendations
+# -----------------------------------
+# 🌟 Fungsi utama untuk menghasilkan rekomendasi parfum gabungan.
+# Menerima deskripsi teks dari pengguna dan daftar persentase untuk berbagai fitur (notes).
+# Proses:
+# 1. Memeriksa apakah semua komponen model (BERT, Autoencoder, Scaler, matriks fitur gabungan, DataFrame) telah dimuat.
+# 2. Mengubah input persentase menjadi array numpy dan melakukan scaling.
+# 3. Menghasilkan embedding dari input persentase menggunakan Autoencoder (v1_input).
+# 4. Menghasilkan embedding dari deskripsi teks menggunakan model BERT (v2_input).
+# 5. Menggabungkan v1_input dan v2_input (setelah padding jika perlu untuk menyamakan dimensi)
+#    menjadi satu vektor fitur input tunggal melalui konkatenasi, perbedaan (norma), dan produk Hadamard.
+# 6. Menghitung similaritas kosinus antara vektor fitur input gabungan dengan matriks fitur gabungan
+#    dari semua parfum dalam dataset.
+# 7. Mengembalikan 10 parfum teratas dengan skor similaritas tertinggi.
+# Jika ada komponen yang hilang atau terjadi error, fungsi akan mengembalikan DataFrame kosong.
 def get_combined_recommendations(description, percentages):
     print("--- Inside get_combined_recommendations (New Method) ---")
     print(f"Description: {description}")
@@ -371,7 +454,11 @@ def get_combined_recommendations(description, percentages):
         traceback.print_exc() # Print detailed traceback for debugging
         return pd.DataFrame()
 
-
+# Fungsi convert_df_to_list
+# -------------------------
+# 🔄 Mengkonversi DataFrame Pandas menjadi list of dictionaries.
+# Setiap dictionary dalam list mewakili satu baris dari DataFrame,
+# dengan keys adalah nama kolom dan values adalah nilai sel.
 def convert_df_to_list(df):
     """Konversi DataFrame ke list of dictionaries."""
     return df.to_dict(orient='records')

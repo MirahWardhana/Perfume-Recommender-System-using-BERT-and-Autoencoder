@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -14,12 +15,19 @@
     rel="stylesheet">
 
     <title>Customize Notes and Description</title>
+    <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.webp' %}">
 
     <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{% static 'myapp/assets/css/feature.css' %}">
 
   </head>
   <body class="no-scrollbar">
+    {% if error_message %}
+      <div class="alert alert-danger" role="alert" style="margin: 1rem;">
+        {{ error_message }}
+      </div>
+    {% endif %}
+
     <!-- Input -->
     <form action="{% url 'feature1' %}" method="POST">
         {% csrf_token %}
@@ -30,21 +38,21 @@
                 <div class="table-wrapper container mt-2 table-container" id="scroll-style">
                   <table class="table">
                     <tbody>
-                        {% for note in df_notes %}
+                        {% for note_item in df_notes %}
                         <tr>
-                            <td >{{ note.Notes }}</td>
+                            <td>{{ note_item.Notes|title }}</td>
                             <td class="slider-container">
                                 <input
                                     name="percentage_{{ forloop.counter }}"
                                     type="range"
                                     min="0"
                                     max="100"
-                                    value="{{ note.percentage }}"
+                                    value="{% if input_percentages %}{{ input_percentages|get_item:note_item.Notes|title }}{% else %}0{% endif %}"
                                     class="form-range custom-slider"
                                     id="slider{{ forloop.counter }}"
-                                    oninput="updateSlider({{ forloop.counter }})">
+                                    oninput="updateSliderDisplay({{ forloop.counter }})">
                                 <span id="sliderPercentage{{ forloop.counter }}" class="slider-percentage">
-                                    {{ note.percentage }}%
+                                    {% if input_percentages %}{{ input_percentages|get_item:note_item.Notes|title }}{% else %}0{% endif %}%
                                 </span>
                             </td>
                         </tr>
@@ -60,9 +68,9 @@
                     <div class="col-sm-12 description-input-section">
                         <div class="description-input-wrapper">
                             <h2>Description</h2>
-                            <textarea class="no-scrollbar description-input" id="prediction-input" name="description" type="text"
+                            <textarea class="no-scrollbar description-input" id="prediction-input" name="description"
                             rows="5" spellcheck="false"
-                            placeholder="Enter a description"></textarea>
+                            placeholder="Enter a description">{{ description }}</textarea>
                         </div>
                     </div>
                     <div class="col-sm-12 button-section">
@@ -87,24 +95,27 @@
     <div id="targetDiv" class="result-section">
         <!-- Bagian Judul -->
         <div class="col-12">
-            <h2 class="mb-3">Result</h2>
+            <h2 class="mb-3">Recommendation Result</h2>
         </div>
 
         <!-- Bagian Grid -->
-        <div class="container mt-4 mb-4 result-grid" id="scroll-style">
-            <div class="row g-0 grid-row">
+        <div class="container mt-4 mb-4 result-grid" id="scroll-style-results">
+            <div class="row g-0 grid-row justify-content-center">
                 {% if recommendations %}
-                    {% for recommendation in recommendations %}
+                    {% for r in recommendations %}
                         <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
                             <div class="flip-card-inner">
     
                                 <!-- Front -->
                                 <div class="flip-card-front">
-                                    <img class="card-img-top" src="{{ recommendation.Image }}" alt="{{ recommendation.Perfume_Name }}">
+                                    <img class="card-img-top" src="{{ r.Image }}" alt="{{ r.Perfume_Name }}">
                                     <div class="card-body">
-                                        <h5 class="card-title">{{ recommendation.Perfume_Name }}</h5>
-                                        <p class="card-text">{{ recommendation.Brand_Name }}</p>
-                                        <p class="card-text">{{ recommendation.Gender }}</p>
+                                        <h5 class="card-title">{{ r.Perfume_Name }}</h5>
+                                        <p class="card-text">{{ r.Brand }}</p>
+                                        <p class="card-text">{{ r.Gender }}</p>
+                                        <p class="card-text score-text" style="font-size: 0.5rem;">
+                                            Score: {{ r.Combined_Similarity_Score|floatformat:3 }}%
+                                        </p>
                                     </div>
                                 </div>
     
@@ -112,7 +123,7 @@
                                 <div class="flip-card-back">
                                     <h5>More Info</h5>
                                      <!-- Link ke halaman Fragrantica -->
-                                    <a href="{{ recommendation.URL }}" target="_blank" rel="noopener noreferrer">
+                                    <a href="{{ r.URL }}" target="_blank" rel="noopener noreferrer">
                                         View on Fragrantica
                                     </a>
                                 </div>
@@ -121,7 +132,7 @@
                         </div>
                     {% endfor %}
                 {% else %}
-                    <p>No recommendations found.</p>
+                    <p class="text-muted mt-3">No recommendations found for your input.</p>
                 {% endif %}
             </div>
         </div>
@@ -135,6 +146,108 @@
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <script>
+        function makeColor(value) {
+            value = Math.min(Math.max(0, parseInt(value)), 100);
+            var redValue = 255 - Math.round(value * 2.55);
+            var greenValue = Math.round(value * 2.55);
+            function intToHex(v) { var h = parseInt(v).toString(16); return h.length == 1 ? "0" + h : h; }
+            return "#" + intToHex(redValue) + intToHex(greenValue) + "00";
+        }
+
+        function updateSliderDisplay(id) {
+            const slider = document.getElementById(`slider${id}`);
+            const percentageSpan = document.getElementById(`sliderPercentage${id}`);
+            if (slider && percentageSpan) {
+                const value = slider.value;
+                const color = makeColor(value);
+                percentageSpan.textContent = value + "%";
+                slider.style.background = `linear-gradient(to right, ${color} ${value}%, #ddd ${value}%)`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sliders = document.querySelectorAll('.custom-slider');
+            sliders.forEach(slider => {
+                const idMatch = slider.id.match(/\d+$/);
+                if (idMatch) {
+                    updateSliderDisplay(idMatch[0]);
+                }
+            });
+
+            {% if recommendations is not None %}
+                const targetDiv = document.getElementById('targetDiv');
+                if (targetDiv) {
+                    targetDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            {% endif %}
+        });
+    </script>
+
+    <style>
+        /* --- Reduce Vertical Spacing in Rec Cards (Feature 1) --- */
+        #targetDiv .result-grid .card-body .card-text {
+            margin-bottom: 0; /* Remove bottom margin */
+            line-height: 1.2; /* Reduce line height slightly */
+        }
+        #targetDiv .result-grid .card-body .card-title {
+             margin-bottom: 0.15rem; /* Make title margin smaller too */
+        }
+        .score-text {
+            font-size: 0.8em;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        /* --- Remove 5 Cards Per Row Layout --- */
+        /* Remove or comment out these rules from the previous attempt */
+        /*
+        #targetDiv .result-grid .row.grid-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #targetDiv .result-grid .card-wrapper {
+            width: auto;
+            flex: 0 1 calc(20% - 0.5rem);
+            margin: 0.25rem;
+        }
+        */
+
+        /* --- Add Horizontal Margins to the Grid Container ON LARGE SCREENS ONLY --- */
+        @media (min-width: 992px) { /* Apply for large devices and up (Bootstrap lg breakpoint) */
+            #targetDiv > .container.mt-4.mb-4.result-grid { /* Target the container holding the grid */
+                 margin-left: 20%;  /* Apply margin */
+                 margin-right: 20%; /* Apply margin */
+                 width: auto; /* Allow width to shrink due to margins */
+                 /* Note: Bootstrap's .container already has max-width. These margins will further constrain it. */
+                 /* You might need to adjust the percentage depending on the container's max-width */
+            }
+        }
+
+    </style>
+
+    <style>
+        /* Responsive: Card lebih panjang di mobile */
+        @media (max-width: 576px) {
+            #targetDiv .result-grid .card-wrapper,
+            #targetDiv .result-grid .flip-card-front {
+                min-height: 220px;
+                height: 220px;
+                max-width: 95vw;
+            }
+            #targetDiv .result-grid .card-img-top {
+                max-height: 110px;
+                object-fit: contain;
+            }
+            #targetDiv .result-grid .card-body {
+                padding: 0.5rem 0.25rem;
+            }
+        }
+    </style>
+
   </body>
 
 </html>

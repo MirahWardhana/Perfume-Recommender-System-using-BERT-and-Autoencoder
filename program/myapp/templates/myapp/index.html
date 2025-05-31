@@ -7,6 +7,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fragrantica Recommendations</title>
+  
+  <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.webp' %}">
 
   <!--
     - custom css link 
@@ -97,7 +99,7 @@
           <h1 class="main-heading">Discover Your Signature Scent</h1>
 
           <p class="home-text">
-            Looking for the perfect fragrance that speaks to your personality? With our Fragrance Recommendation System, you can effortlessly find the scent that matches your lifestyle, preferences, and mood. In just a few steps, we'll guide you to your new favorite fragrance, tailored uniquely to you.
+            Looking for the perfect fragrance that speaks to your personality? With our Fragrance Recommendation System, you can effortlessly find the scent that matches your lifestyle, preferences, and mood. In just a few steps, we’ll guide you to your new favorite fragrance, tailored uniquely to you.
           </p>
 
           <div class="btn-group">
@@ -154,7 +156,7 @@
           <div class="abs-content-box">
             <div class="dotted-border">
               <p class="number-lg">1</p>
-              <p class="text-md">Years <br> Experiense</p>
+              <p class="text-md">Year <br>Project</p>
             </div>
           </div>
 
@@ -167,20 +169,19 @@
 
         <div class="about-right">
 
-          <h2 class="section-title">We are doing more than
-            you expect</h2>
+          <h2 class="section-title">How the recommendation system works</h2>
 
           <p class="section-text">
-            In the modern era, perfume is more than a fragrance—it's a means of expressing identity and personality. A chosen scent often reflects character, mood, or cultural values, becoming an essential part of daily life. Perfumes consist of three layers—top, middle, and base notes—that gradually unfold after application.
+            In the modern era, perfume is more than a fragrance—it’s a means of expressing identity and personality. A chosen scent often reflects character, mood, or cultural values, becoming an essential part of daily life. Perfumes consist of three layers—top, middle, and base notes—that gradually unfold after application.
 
           </p>
 
           <p class="section-text">
-            With countless options available, finding the right perfume can be challenging. Note-based recommendation systems simplify this process by using data on a user's preferences to suggest suitable scents. These systems save time, encourage exploration of new aromas, and meet the growing demand for personalized fragrance experiences.
+            This system leverages Autoencoder models to extract meaningful features from perfume-related data, capturing underlying patterns and reducing dimensionality for more efficient processing. Additionally, it employs BERT (Bidirectional Encoder Representations from Transformers) to deeply understand and interpret user-provided natural language descriptions, allowing the system to grasp context, nuance, and intent. The combination of these advanced machine learning techniques enables the generation of highly accurate and personalized perfume recommendations tailored to individual preferences.
 
           </p>
 
-          <img  src="{% static 'myapp/assets/images/signature.png' %}" alt="signature" class="signature" width="150">
+          <img  src="{% static 'myapp/assets/images/ttd2.png' %}" alt="signature" class="signature" width="200">
 
         </div>
 
@@ -194,7 +195,7 @@
         - #RECOMMENDATION1 SECTION
       -->
 
-      <section class="recommendation1 " id="recommendation1" style="margin-top:5vh; display:flex; display: flex; align-items: center;">
+      <section class="recommendation1" id="recommendation1" style="margin-top:5vh; margin-right: 1rem; margin-left: 1rem; display:flex; display: flex; align-items: center;">
         <div class="container">
           <div class="row">
             <div class="col-md-6 col-sm-12 justify-content-center align-items-center" >
@@ -202,7 +203,7 @@
               <div class="container">
                 <h2 class="section-title" style="margin-bottom: 3vh;">Find Perfume Recommendation from Notes Selection and Description</h2>
                 
-              <p class="section-text" style="margin-bottom: 3vh;" >Input your preferred fragrance notes and a brief description of the scent you're looking for. Our system will analyze your input and generate perfume suggestions based on percentage note compositions.</p>
+              <p class="section-text" style="margin-bottom: 3vh;" >Input your preferred fragrance notes and a brief description of the scent you’re looking for. Our system will analyze your input and generate perfume suggestions based on percentage note compositions.</p>
                 <button class="btn btn-primary btn-icon" >
                   <a href="{% url 'feature1' %}" class="btn btn-primary btn-icon">
                     Show Recommendations
@@ -211,7 +212,7 @@
               </div>
 
             </div>
-            <div class="col-md-6 col-sm-12 recommendation1-column-2"> 
+            <div class="col-md-6 col-sm-12" style="height:80vh; display: flex; flex-direction: column; align-items: flex-end; justify-content: center;">
               <div>
                 <h2 class="section-title" style="text-align: right; margin-bottom: 3vh;">Find Perfume Recommendation from Product Selection</h2>
               </div>
@@ -236,54 +237,6 @@
       <!--
         - #RECOMMENDATION2 SECTION
       -->
-{% comment %} 
-      <section class="recommendation2" id="recommendation2">
-        <div class="container">
-          <div class="row">
-            <div class="col-md-12 col-sm-12">
-              <div class="table-wrapper container mt-2">
-                <table class="table">
-                  <tbody>
-                    <tr>
-                      <td>floral</td>
-                      <td class="slider-container">
-                          <input 
-                              type="range" 
-                              min="0" 
-                              max="100" 
-                              value="50" 
-                              class="form-range custom-slider" 
-                              id="slider1" 
-                              oninput="updateSlider(1)">
-                          <span id="sliderPercentage1" class="slider-percentage">50%</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>citrus</td>
-                      <td class="slider-container">
-                          <input 
-                              type="range" 
-                              min="0" 
-                              max="100" 
-                              value="75" 
-                              class="form-range custom-slider" 
-                              id="slider2" 
-                              oninput="updateSlider(2)">
-                          <span id="sliderPercentage2" class="slider-percentage">75%</span>
-                      </td>
-                    </tr>
-                    
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="col-md-12 col-sm-12" style="background:orange;">
-              2 of 2
-            </div>
-          </div>
-        </div>
-      </section> {% endcomment %}
 
     </main>
 
