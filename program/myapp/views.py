@@ -11,11 +11,9 @@ import traceback
 import numpy as np
 
 # Views
-@csrf_exempt
 def index(request):
     return render(request, "myapp/index.html")
 
-@csrf_exempt
 def feature1(request):
     notes_name_list = []
     if notes_df_global is not None and 'Notes' in notes_df_global.columns:
@@ -28,38 +26,33 @@ def feature1(request):
     if request.method == 'POST':
         try:
             description = ''
-            percentages_list = []
+            percentages_dict = {}
 
             if is_ajax:
                 data = json.loads(request.body)
                 description = data.get('description', '')
-                percentages_input = data.get('percentages', [])
-                if not isinstance(percentages_input, list):
-                    return JsonResponse({'status': 'error', 'message': 'Invalid percentages format. Expected array.'}, status=400)
-                percentages_list = [float(val) for val in percentages_input]
+                percentages_input = data.get('percentages', {})
+                if not isinstance(percentages_input, dict):
+                     return JsonResponse({'status': 'error', 'message': 'Invalid percentages format.'}, status=400)
+                percentages_dict = {k: v for k, v in percentages_input.items() if isinstance(v, (int, float))}
+
             else:
                 description = request.POST.get('description', '')
-                percentages_json = request.POST.get('percentages', '[]')
-                try:
-                    percentages_list = json.loads(percentages_json)
-                    if not isinstance(percentages_list, list):
-                        raise ValueError("Percentages must be an array")
-                    percentages_list = [float(val) for val in percentages_list]
-                except (json.JSONDecodeError, ValueError) as e:
-                    print(f"Error parsing percentages: {e}")
-                    percentages_list = []
+                for note_item in notes_df_global.to_dict(orient='records'):
+                    note_name = note_item['Notes']
+                    percentage_val_str = request.POST.get(note_name)
+                    try:
+                        percentages_dict[note_name] = int(percentage_val_str) if percentage_val_str else 0
+                    except (ValueError, TypeError):
+                        percentages_dict[note_name] = 0
 
-            print(f"Received percentages (raw): {percentages_list}")
-
+            ordered_percentages = []
             if features:
                 num_expected_features = len(features)
-                if len(percentages_list) != num_expected_features:
-                    print(f"Warning: Received {len(percentages_list)} percentages but expected {num_expected_features}")
-                    # Pad or truncate the list to match expected length
-                    if len(percentages_list) < num_expected_features:
-                        percentages_list.extend([0.0] * (num_expected_features - len(percentages_list)))
-                    else:
-                        percentages_list = percentages_list[:num_expected_features]
+                for feature_name in features:
+                    percentage_value = percentages_dict.get(feature_name, 0)
+                    ordered_percentages.append(percentage_value)
+
             else:
                 print("Error: 'features' list from models.py is empty or not loaded.")
                 if is_ajax:
@@ -68,30 +61,26 @@ def feature1(request):
                     context['error_message'] = 'Model features configuration error.'
                     return render(request, "myapp/feature1.html", context)
 
-            recommendations_df = get_combined_recommendations(description, percentages_list)
+            recommendations_df = get_combined_recommendations(description, ordered_percentages)
 
             recommendations = []
             if recommendations_df is not None and not recommendations_df.empty:
-                # Get exactly 10 recommendations
-                recommendations = recommendations_df.head(10).to_dict(orient='records')
-                print(f"Generated {len(recommendations)} recommendations.")
-            else:
-                print("No recommendations generated.")
+                recommendations = recommendations_df.to_dict(orient='records')
 
             if is_ajax:
-                return JsonResponse({'recommendations': recommendations})
+                 return JsonResponse({'recommendations': recommendations})
             else:
-                context['description'] = description
-                context['input_percentages'] = percentages_list
-                context['recommendations'] = recommendations
-                return render(request, "myapp/feature1.html", context)
+                 context['description'] = description
+                 context['input_percentages'] = percentages_dict
+                 context['recommendations'] = recommendations
+                 return render(request, "myapp/feature1.html", context)
 
         except json.JSONDecodeError:
-            if is_ajax:
-                return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
-            else:
-                context['error_message'] = 'Invalid data submitted.'
-                return render(request, "myapp/feature1.html", context)
+             if is_ajax:
+                 return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+             else:
+                 context['error_message'] = 'Invalid data submitted.'
+                 return render(request, "myapp/feature1.html", context)
         except Exception as e:
             print(f"Error processing feature1 request: {e}")
             traceback.print_exc()
@@ -104,7 +93,7 @@ def feature1(request):
     else:
         return render(request, "myapp/feature1.html", context)
 
-@csrf_exempt
+@csrf_protect
 @require_POST
 def process_url(request):
     try:
@@ -168,7 +157,9 @@ def insight(url):
         valid_numeric_cols = [col for col in numeric_cols if col not in cols_to_exclude and col in input_df.columns]
 
         numeric_subset = input_df[valid_numeric_cols]
-        numeric_df_final = input_df[valid_numeric_cols]
+        non_zero_mask = (numeric_subset != 0) & (numeric_subset.notna())
+        filtered_numeric_cols = numeric_subset.loc[:, non_zero_mask.any(axis=0)].columns
+        numeric_df_final = input_df[filtered_numeric_cols]
 
         return input_df, numeric_df_final
 
@@ -181,7 +172,6 @@ def insight(url):
          return pd.DataFrame(), pd.DataFrame()
 
 
-@csrf_exempt
 def feature2(request):
     df_list = []
     if df is not None and not df.empty:
@@ -201,7 +191,7 @@ def feature2(request):
 
     all_notes_list = []
     if notes_df_global is not None and 'Notes' in notes_df_global.columns:
-         all_notes_list = notes_df_global["Notes"].tolist()
+         all_notes_list = notes_df_global["Notes"].str.replace("_", " ").str.title().tolist()
 
     context = {
         "datas": page_obj.object_list,

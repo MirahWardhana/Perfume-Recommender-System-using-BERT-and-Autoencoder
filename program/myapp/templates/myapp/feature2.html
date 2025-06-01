@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <title>Customize Perfume Selection</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'myapp/assets/images/iconweb.webp' %}">
+    <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.png' %}">
 
     <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{% static 'myapp/assets/css/feature.css' %}">
@@ -160,7 +160,7 @@
                         <!-- Buttons -->
                         <div class="button-group text-center mb-2"> {# Centered buttons #}
                             <button id="getRecommendationsBtn" class="btn btn-dark shiny-button m-1" onclick="collectDataAndRecommend()" type="button" disabled>Get Recommendations</button> {# Disabled initially #}
-                    <a class="btn btn-outline-dark m-1 cancel-button" href="{% url 'index' %}">Back</a>
+                    <a class="btn btn-outline-dark m-1 cancel-button" href="{% url 'index' %}">Back to Home</a>
             </div>
         </div>
     </div>
@@ -316,7 +316,7 @@
                 imgElement.alt = inputData.Perfume_Name || 'Selected perfume';
                 console.log("Image updated.");
             } else {
-                console.error("Element 'insightImage' not found!");
+                console.error("Element 'insightImage' not found!"); // Add error log
             }
 
             // Update Details Table
@@ -324,28 +324,33 @@
             const detailBrand = document.getElementById('detailBrand');
             const detailGender = document.getElementById('detailGender');
             const detailDescription = document.getElementById('detailDescription');
-            
-            if(detailName) detailName.textContent = inputData.Perfume_Name || '-';
-            if(detailBrand) detailBrand.textContent = inputData.Brand || '-';
-            if(detailGender) detailGender.textContent = inputData.Gender || '-';
-            if(detailDescription) detailDescription.textContent = inputData.Description || '-';
-            
-            console.log("Details table updated.");
+            // Add checks before updating text content
+            if(detailName) detailName.textContent = inputData.Perfume_Name || '-'; else console.error("Element 'detailName' not found!");
+            if(detailBrand) detailBrand.textContent = inputData.Brand || '-'; else console.error("Element 'detailBrand' not found!");
+            if(detailGender) detailGender.textContent = inputData.Gender || '-'; else console.error("Element 'detailGender' not found!");
+            if(detailDescription) detailDescription.textContent = inputData.Description || '-'; else console.error("Element 'detailDescription' not found!");
+            console.log("Details table updated (or attempted).");
 
             // Update Notes Table (Sliders)
             const notesTableBody = document.getElementById('notesTableBody');
             if (!notesTableBody) {
-                console.error("Notes table body element 'notesTableBody' not found!");
-                return;
+                 console.error("Notes table body element 'notesTableBody' not found!"); // Crucial check
+                 console.log("--- updateInsightSection END (Error: Table Body Missing) ---");
+                 return; // Stop execution if the table body isn't found
             }
-
+            // Clear the table body *before* adding new rows
             notesTableBody.innerHTML = '';
             console.log("Cleared notes table body.");
+
+            // --- Refined Slider Creation and Styling ---
+            let slidersToUpdate = []; // Array to store IDs for post-append update
 
             if (numericData && numericData.length > 0) {
                 console.log(`Processing ${numericData.length} numeric data items.`);
                 let displayedNotesCount = 0;
 
+                // 1. Build HTML String for all rows first
+                let tableBodyHtml = "";
                 numericData.forEach((item, index) => {
                     const percentageValue = item.val * 100;
                     if (percentageValue > 0.1) {
@@ -355,7 +360,7 @@
                         const noteName = item.col;
                         const initialSliderValue = Math.max(0, Math.min(100, Math.round(percentageValue)));
 
-                        const rowHtml = `
+                        tableBodyHtml += `
                             <tr>
                                 <td>${noteName}</td>
                                 <td class="slider-container">
@@ -368,22 +373,47 @@
                                         id="${sliderId}"
                                         data-note-name="${noteName}"
                                         oninput="updateSliderValue(this, '${percentageId}')">
-                                    <span id="${percentageId}" class="slider-percentage">${percentageValue.toFixed(3)}%</span>
+                                    <span id="${percentageId}" class="slider-percentage">${percentageValue.toFixed(1)}%</span>
                                 </td>
                             </tr>
                         `;
-                        notesTableBody.insertAdjacentHTML('beforeend', rowHtml);
+                        // Store the IDs for later update
+                        slidersToUpdate.push({ sliderId: sliderId, percentageId: percentageId });
                     }
                 });
 
-                if (displayedNotesCount === 0) {
-                    notesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No significant notes data found for this perfume.</td></tr>';
+                // 2. Set the innerHTML once
+                if (displayedNotesCount > 0) {
+                     notesTableBody.innerHTML = tableBodyHtml;
+                     console.log(`Set innerHTML for ${displayedNotesCount} sliders.`);
+                } else {
+                    console.log("No significant notes found, adding placeholder.");
+                    notesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted" id="notesPlaceholder">No significant notes data found for this perfume.</td></tr>';
                 }
-            } else {
-                notesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No notes data available for this perfume.</td></tr>';
-            }
 
-            console.log("--- updateInsightSection END ---");
+
+                // 3. Update Styles After Setting InnerHTML (allowing DOM to potentially update)
+                // Use a minimal timeout to ensure DOM has likely updated
+                setTimeout(() => {
+                    console.log(`Attempting to update styles for ${slidersToUpdate.length} sliders after timeout.`);
+                    slidersToUpdate.forEach(ids => {
+                        const sliderElement = document.getElementById(ids.sliderId);
+                        if (sliderElement) {
+                            updateSliderValue(sliderElement, ids.percentageId); // Apply initial color/text
+                        } else {
+                            // This log is crucial!
+                            console.error(`Could not find slider ${ids.sliderId} after setting innerHTML and timeout.`);
+                        }
+                    });
+                     console.log("Finished updating slider styles after timeout.");
+                }, 0); // 0ms timeout often yields to the browser's rendering cycle
+
+
+            } else {
+                console.log("No numeric data available, adding placeholder.");
+                notesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted" id="notesPlaceholder">No notes data available for this perfume.</td></tr>';
+            }
+             console.log("--- updateInsightSection END ---");
         }
 
         function resetInsightSection(message = "Click a perfume card to load its notes.") {
@@ -458,71 +488,71 @@
             // 1. Get Description from the currently loaded perfume
             const description = currentPerfumeData.input.Description || '';
 
-            // 2. Get Percentages from the *current* slider values
-            const percentages = [];
-            
-            // First, initialize all notes with 0.0
-            ALL_NOTE_NAMES.forEach(() => {
-                percentages.push(0.0);
-            });
-
-            // Then update with actual slider values
+            // 2. Get Percentages from the *current* slider values, converting back to 0-1 range
+            const percentages = {};
             const notesTableBody = document.getElementById('notesTableBody');
             const sliders = notesTableBody.querySelectorAll('input[type="range"]');
-            
+
+            // Populate percentages from visible sliders
             sliders.forEach(slider => {
-                const noteName = slider.getAttribute('data-note-name');
-                if (noteName) {
-                    const index = ALL_NOTE_NAMES.indexOf(noteName);
-                    if (index !== -1) {
-                        const value = parseFloat(slider.value) / 100.0; // Convert to 0-1 range as float
-                        percentages[index] = value;
-                    }
-                }
+                 const noteName = slider.getAttribute('data-note-name'); // Get name from data attribute
+                 if (noteName) {
+                     // Divide slider value by 100 to convert back to 0-1 range for backend
+                    percentages[noteName] = parseInt(slider.value, 10) / 100.0;
+                 }
             });
 
-            console.log("--- Sending data from Feature 2 ---");
-            console.log("Sending Description:", description);
-            console.log("Sending Percentages:", percentages);
+            // Add all other possible notes (from ALL_NOTE_NAMES) with a value of 0
+            // if they weren't already included by a slider.
+            ALL_NOTE_NAMES.forEach(noteName => {
+                 if (!(noteName in percentages)) {
+                     percentages[noteName] = 0.0; // Send 0.0 for notes not present
+                 }
+             });
 
-            // 3. Send data to recommendation endpoint
-            fetch("{% url 'feature1' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken(),
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    description: description,
-                    percentages: percentages // Send as array
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw new Error(err.message || 'Recommendation request failed'); });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Recommendations received:", data);
-                displayRecommendations(data.recommendations || []);
-                scrollToTarget();
-            })
-            .catch(error => {
-                console.error('Error getting recommendations:', error);
-                alert('Error getting recommendations: ' + error.message);
-                displayRecommendations([]);
-            })
-            .finally(() => {
-                if (getRecBtn) {
-                    getRecBtn.disabled = false;
-                    getRecBtn.textContent = 'Get Recommendations';
-                }
-            });
-        }
+             console.log("--- Sending data from Feature 2 ---");
+             console.log("Sending Description:", description);
+             console.log("Sending Percentages (0-1 range):", percentages);
 
-        function displayRecommendations(recommendations) {
+            // 3. Send data to recommendation endpoint (feature1 URL)
+             fetch("{% url 'feature1' %}", { // Use feature1 endpoint for combined recommendations
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                     'X-CSRFToken': getCsrfToken(),
+                     'X-Requested-With': 'XMLHttpRequest'
+                 },
+                 body: JSON.stringify({
+                     description: description,
+                     percentages: percentages // Send the dictionary with values in 0-1 range
+                 })
+             })
+             .then(response => {
+                 if (!response.ok) {
+                     return response.json().then(err => { throw new Error(err.message || 'Recommendation request failed'); });
+                 }
+                 return response.json();
+             })
+             .then(data => {
+                 console.log("Recommendations received:", data);
+                 displayRecommendations(data.recommendations || []); // Pass empty array if undefined
+                 scrollToTarget(); // Scroll after displaying
+             })
+             .catch(error => {
+                 console.error('Error getting recommendations:', error);
+                 alert('Error getting recommendations: ' + error.message);
+                 displayRecommendations([]); // Clear grid on error
+             })
+             .finally(() => {
+                 // Re-enable button and reset text
+                 if (getRecBtn) {
+                     getRecBtn.disabled = false;
+                     getRecBtn.textContent = 'Get Recommendations';
+                 }
+             });
+         }
+
+         function displayRecommendations(recommendations) {
             const grid = document.getElementById('recommendationsGrid');
             const placeholder = document.getElementById('recommendationsPlaceholder');
             // Clear previous cards
@@ -539,8 +569,8 @@
             // Hide placeholder
             if (placeholder) placeholder.style.display = 'none';
 
-            // Display all recommendations (up to 10)
-            const topRecommendations = recommendations.slice(0, 10);
+            // Get top 10 recommendations starting from index 1 (second item)
+            const topRecommendations = recommendations.slice(1, 11);
 
             // Render each recommendation using the same flip-card markup as feature1
             topRecommendations.forEach(rec => {
@@ -626,10 +656,6 @@
         }
         /* --- End Pagination Customization --- */
 
-        /* Only remove horizontal scrollbar from recommendation result */
-        #targetDiv .result-grid {
-            overflow-x: hidden;
-        }
 
         /* Basic styles for recommendation card back */
         .recommendation-card .flip-card-back {

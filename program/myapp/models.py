@@ -36,20 +36,88 @@ except Exception as e:
 
 
 notes_list = [
-    'woody', 'citrus', 'sweet', 'powdery', 'floral', 'fruity', 'aromatic',
- 'white floral', 'warm spicy', 'fresh spicy', 'amber', 'musky',
- 'vanilla', 'fresh', 'green', 'rose', 'earthy', 'patchouli',
- 'balsamic', 'soft spicy', 'aquatic', 'animalic', 'leather',
- 'lavender', 'iris', 'violet', 'tropical', 'herbal', 'yellow floral',
- 'oud', 'ozonic', 'lactonic', 'smoky', 'mossy', 'tuberose',
- 'marine', 'cinnamon', 'aldehydic', 'caramel', 'almond', 'coconut', 'nutty',
- 'honey', 'tobacco', 'salty', 'cherry', 'anis', 'coffee', 'cacao',
- 'metallic', 'chocolate', 'rum', 'soapy', 'sour', 'conifer',
- 'mineral', 'camphor', 'savory', 'beeswax', 'sand', 'whiskey', 'Champagne',
- 'bitter', 'terpenic', 'wine', 'alcohol', 'cannabis', 'vodka',
- 'coca-cola', 'oily', 'clay', 'vinyl', 'asphault', 'tennis ball',
- 'industrial glue', 'plastic', 'brown scotch tape', 'rubber',
- 'foresty', 'sake', 'paper', 'Pear'
+    'woody',
+ 'citrus',
+ 'sweet',
+ 'powdery',
+ 'floral',
+ 'fruity',
+ 'aromatic',
+ 'white floral',
+ 'warm spicy',
+ 'fresh spicy',
+ 'amber',
+ 'musky',
+ 'vanilla',
+ 'fresh',
+ 'green',
+ 'rose',
+ 'earthy',
+ 'patchouli',
+ 'balsamic',
+ 'soft spicy',
+ 'aquatic',
+ 'animalic',
+ 'leather',
+ 'lavender',
+ 'iris',
+ 'violet',
+ 'tropical',
+ 'herbal',
+ 'yellow floral',
+ 'oud',
+ 'ozonic',
+ 'lactonic',
+ 'smoky',
+ 'mossy',
+ 'tuberose',
+ 'marine',
+ 'cinnamon',
+ 'aldehydic',
+ 'caramel',
+ 'almond',
+ 'coconut',
+ 'nutty',
+ 'honey',
+ 'tobacco',
+ 'salty',
+ 'cherry',
+ 'anis',
+ 'coffee',
+ 'cacao',
+ 'metallic',
+ 'chocolate',
+ 'rum',
+ 'soapy',
+ 'sour',
+ 'conifer',
+ 'mineral',
+ 'camphor',
+ 'savory',
+ 'beeswax',
+ 'sand',
+ 'whiskey',
+ 'Champagne',
+ 'bitter',
+ 'terpenic',
+ 'wine',
+ 'alcohol',
+ 'cannabis',
+ 'vodka',
+ 'coca-cola',
+ 'oily',
+ 'clay',
+ 'vinyl',
+ 'asphault',
+ 'tennis ball',
+ 'industrial glue',
+ 'plastic',
+ 'brown scotch tape',
+ 'rubber',
+ 'foresty',
+ 'sake',
+ 'paper',
+ 'Pear'
 ]
 notes = pd.DataFrame({'Notes': notes_list})
 notes['percentage'] = 0
@@ -152,63 +220,83 @@ except Exception as e:
 
 # Pre-calculate combined features matrix
 try:
-    print("\n--- Attempting Combined Features Matrix Calculation ---")
+    print("\n--- Attempting Combined Features Matrix Calculation ---") # Added Header
     if perfume_encodings is not None and doc_embeddings is not None:
-        print(f"Shape of perfume_encodings: {perfume_encodings.shape}")
-        print(f"Shape of doc_embeddings: {doc_embeddings.shape}")
+        print(f"Shape of perfume_encodings: {perfume_encodings.shape}") # Added Print
+        print(f"Shape of doc_embeddings: {doc_embeddings.shape}")     # Added Print
 
         # Ensure consistent number of samples (rows)
         if perfume_encodings.shape[0] == doc_embeddings.shape[0]:
-            print("Number of samples match between perfume and doc embeddings.")
-            v1 = perfume_encodings  # Autoencoder embeddings
-            v2 = doc_embeddings    # BERT embeddings
+            print("Number of samples match between perfume and doc embeddings.") # Added Print
+            v1 = perfume_encodings  # Shape e.g., (num_perfumes, 82) -> or latent dim
+            v2 = doc_embeddings    # Shape e.g., (num_perfumes, 384)
 
             # Get dimensions
             num_perfumes, dim_v1 = v1.shape
             _, dim_v2 = v2.shape
-            print(f"Autoencoder embedding dimension (dim_v1): {dim_v1}")
-            print(f"BERT embedding dimension (dim_v2): {dim_v2}")
+            print(f"Autoencoder embedding dimension (dim_v1): {dim_v1}") # Added Print
+            print(f"BERT embedding dimension (dim_v2): {dim_v2}")       # Added Print
 
-            # Convert to TensorFlow tensors
-            tf_v1 = tf.constant(v1, dtype=tf.float32)
-            tf_v2 = tf.constant(v2, dtype=tf.float32)
-
-            # Pad v1 to match v2 dimension (384)
+            # Pad v1 to match v2 dimension
             padding_width = dim_v2 - dim_v1
+            print(f"Padding width required for v1: {padding_width}") # Added Print
+
             if padding_width < 0:
-                print(f"Error: BERT dimension ({dim_v2}) is smaller than Autoencoder dimension ({dim_v1}).")
-                raise ValueError(f"BERT embedding dimension ({dim_v2}) is smaller than Autoencoder dimension ({dim_v1}).")
-            
-            # Apply padding to v1
-            tf_v1_padded = tf.pad(tf_v1, [[0, 0], [0, padding_width]], mode='CONSTANT', constant_values=0)
-            print(f"Shape of v1 after padding: {tf_v1_padded.shape}")
+                 # This case means BERT dim < Autoencoder dim. Need to decide how to handle.
+                 # Option 1: Raise error (current)
+                 # Option 2: Pad v2 instead
+                 # Option 3: Truncate v1
+                 print(f"Error Condition: BERT dimension ({dim_v2}) is smaller than Autoencoder dimension ({dim_v1}).") # Added Print
+                 raise ValueError(f"BERT embedding dimension ({dim_v2}) is smaller than Autoencoder dimension ({dim_v1}). Padding logic needs adjustment or model dimensions must be aligned.")
+            elif padding_width > 0:
+                 v1_padded = np.pad(v1, ((0, 0), (0, padding_width)), mode='constant', constant_values=0) # Ensure padding with 0
+                 print(f"Shape of v1 after padding: {v1_padded.shape}") # Added Print
+            else:
+                 v1_padded = v1 # No padding needed if dimensions match
+                 print("Dimensions match, no padding needed for v1.") # Added Print
 
-            # Combine features exactly as in the formula
-            concat = tf.concat([tf_v1_padded, tf_v2], axis=1)                     # [v1; v2]
-            difference = tf.norm(tf_v1_padded - tf_v2, axis=1, keepdims=True)     # Euclidean distance [v1 - v2]
-            hadamard_product = tf_v1_padded * tf_v2                               # Element-wise product [v1 ⊙ v2]
 
-            # Stack results horizontally
-            combined_features_matrix_tf = tf.concat([concat, difference, hadamard_product], axis=1)
-            combined_features_matrix = combined_features_matrix_tf.numpy()
-            print(f"Successfully calculated combined matrix. Shape: {combined_features_matrix.shape}")
+            # --- Inner Try-Except for TensorFlow operations ---
+            try:
+                print("Attempting TensorFlow operations for combination...") # Added Print
+                # Calculate components using TensorFlow
+                tf_v1_padded = tf.constant(v1_padded, dtype=tf.float32)
+                tf_v2 = tf.constant(v2, dtype=tf.float32)
+
+                concat = tf.concat([tf_v1_padded, tf_v2], axis=1)
+                difference = tf.norm(tf_v1_padded - tf_v2, axis=1, keepdims=True)
+                hadamard_product = tf_v1_padded * tf_v2
+
+                # Stack results horizontally
+                combined_features_matrix_tf = tf.concat([concat, difference, hadamard_product], axis=1)
+                # Convert back to numpy array BEFORE assigning to the main variable
+                temp_combined_matrix = combined_features_matrix_tf.numpy()
+                print(f"Successfully calculated combined matrix with TensorFlow. Shape: {temp_combined_matrix.shape}") # Added Print
+                combined_features_matrix = temp_combined_matrix # Assign only on success
+
+            except Exception as tf_error:
+                print(f"!!! Error during TensorFlow combination: {tf_error}") # Added Specific Error Print
+                import traceback
+                traceback.print_exc()
+                combined_features_matrix = None # Ensure it's None on TF error
+            # --- End Inner Try-Except ---
 
         else:
-            print(f"Error: Mismatch in number of samples between perfume_encodings ({perfume_encodings.shape[0]}) and doc_embeddings ({doc_embeddings.shape[0]})")
+            print(f"!!! Error: Mismatch in number of samples between perfume_encodings ({perfume_encodings.shape[0]}) and doc_embeddings ({doc_embeddings.shape[0]})") # Enhanced Print
             combined_features_matrix = None
     else:
-        print("Skipping combined features matrix calculation due to missing prerequisites:")
+        print("!!! Skipping combined features matrix calculation due to missing prerequisites:") # Enhanced Print
         if perfume_encodings is None:
             print("  - perfume_encodings is None")
         if doc_embeddings is None:
             print("  - doc_embeddings is None")
-        combined_features_matrix = None
+        combined_features_matrix = None # Ensure it's None if prerequisites missing
 
 except Exception as e:
-    print(f"Error calculating combined features matrix: {e}")
+    print(f"!!! Error calculating combined features matrix (Outer Try-Except): {e}") # Enhanced Print
     import traceback
     traceback.print_exc()
-    combined_features_matrix = None
+    combined_features_matrix = None # Ensure it's None on any outer error
 
 # --- Final Check and Log ---
 if combined_features_matrix is not None:
@@ -216,6 +304,7 @@ if combined_features_matrix is not None:
     print(f"Final shape: {combined_features_matrix.shape}")
 else:
     print(f"--- Combined Features Matrix Calculation Failed ---")
+    # The specific reason should have been printed above
 
 
 # --- Fungsi Rekomendasi ---
@@ -238,64 +327,81 @@ else:
 # 7. Mengembalikan 10 parfum teratas dengan skor similaritas tertinggi.
 # Jika ada komponen yang hilang atau terjadi error, fungsi akan mengembalikan DataFrame kosong.
 def get_combined_recommendations(description, percentages):
-    print("--- Inside get_combined_recommendations ---")
+    print("--- Inside get_combined_recommendations (New Method) ---")
     print(f"Description: {description}")
-    print(f"Received percentages (raw): {percentages}")
-    print(f"Backend features order: {features}")
-
-    # Jika percentages dikirim dalam bentuk dict (misal: {note: value, ...}), urutkan sesuai features
-    if isinstance(percentages, dict):
-        ordered_percentages = [percentages.get(feat, 0) for feat in features]
-        print(f"Ordered percentages (dict input): {ordered_percentages}")
-        percentages = ordered_percentages
-    else:
-        # Jika sudah list, asumsikan urutannya sudah benar, tapi tetap log
-        print(f"Ordered percentages (list input): {percentages}")
+    print(f"Percentages: {percentages}")
 
     # Check if all necessary components are loaded
-    if model_bert is None or autoencoder is None or scaler is None or combined_features_matrix is None or df.empty or not features:
-        print("Warning: One or more models/data components failed to load.")
+    if model_bert is None or autoencoder is None or scaler is None or combined_features_matrix is None or df.empty or not features: # Use 'not features' for empty list check
+        print("Warning: One or more models/data components failed to load or calculate. Cannot generate recommendations.")
+        print(f"  model_bert loaded: {model_bert is not None}")
+        print(f"  doc_embeddings loaded: {doc_embeddings is not None}") # Add check for doc_embeddings here too
+        print(f"  autoencoder loaded: {autoencoder is not None}")
+        print(f"  scaler loaded: {scaler is not None}")
+        print(f"  perfume_encodings calculated: {perfume_encodings is not None}") # Add check for perfume_encodings
+        print(f"  combined_features_matrix calculated: {combined_features_matrix is not None}") # This should now reflect the actual status
+        print(f"  df loaded: {not df.empty}")
+        print(f"  features identified: {bool(features)}") # Check if features list is populated
         return pd.DataFrame()
 
     try:
         # --- Autoencoder Part (Input) ---
         input_data = np.array(percentages).reshape(1, -1)
-        num_expected_features = len(features)
-        
-        if input_data.shape[1] != num_expected_features:
-            print(f"Error: Input percentages length ({input_data.shape[1]}) does not match expected features length ({num_expected_features})")
-            return pd.DataFrame()
 
-        # Handle NaN/inf
+        # --- PERBAIKAN: Gunakan panjang 'features' yang dihitung saat load ---
+        num_expected_features = len(features)
+        if input_data.shape[1] != num_expected_features:
+             print(f"Error: Input percentages length ({input_data.shape[1]}) does not match expected features length ({num_expected_features}) based on loaded data.")
+             # Opsional: Coba pad/truncate jika memungkinkan, tapi lebih aman error
+             # if input_data.shape[1] < num_expected_features:
+             #     input_data = np.pad(input_data, ((0,0), (0, num_expected_features - input_data.shape[1])), 'constant')
+             # elif input_data.shape[1] > num_expected_features:
+             #     input_data = input_data[:, :num_expected_features]
+             # else: # Jika tidak ingin pad/truncate:
+             return pd.DataFrame() # Kembalikan kosong jika dimensi tidak cocok
+
+        # Handle NaN/inf pada input juga (meskipun seharusnya sudah bersih dari view)
         input_data = np.nan_to_num(input_data)
+
+        # --- Lakukan scaling pada input ---
         input_scaled = scaler.transform(input_data)
-        v1_input = autoencoder.predict(input_scaled)
+        v1_input = autoencoder.predict(input_scaled) # Shape (1, num_features) -> (1, latent_dim)
 
         # --- BERT Part (Input) ---
-        v2_input = model_bert.encode([description])
+        v2_input = model_bert.encode([description]) # Shape (1, 384)
 
         # --- Combine Input Features ---
-        # Convert to TensorFlow tensors
-        tf_v1_input = tf.constant(v1_input, dtype=tf.float32)
-        tf_v2_input = tf.constant(v2_input, dtype=tf.float32)
-
-        # Get dimensions
+        # Dapatkan dimensi latent autoencoder dari outputnya
         dim_v1_input = v1_input.shape[1]
         dim_v2_input = v2_input.shape[1]
 
-        # Pad v1_input to match v2_input dimension (384)
+        # Pad v1_input to match v2_input dimension
         padding_width_input = dim_v2_input - dim_v1_input
         if padding_width_input < 0:
-            print(f"Warning: Input BERT dimension ({dim_v2_input}) is smaller than Input Autoencoder dimension ({dim_v1_input})")
-            return pd.DataFrame()
-        
-        # Apply padding to v1_input
-        tf_v1_input_padded = tf.pad(tf_v1_input, [[0, 0], [0, padding_width_input]], mode='CONSTANT', constant_values=0)
+             # Ini bisa terjadi jika latent dim > bert dim
+             # Anda mungkin perlu mem-pad v2 atau memotong v1, tergantung logika yang diinginkan
+             print(f"Warning: Input BERT embedding dimension ({dim_v2_input}) is smaller than Input Autoencoder dimension ({dim_v1_input}). Adjusting padding logic.")
+             # Contoh: Pad v2 instead
+             v2_input_padded = np.pad(v2_input, ((0, 0), (0, -padding_width_input)), mode='constant')
+             v1_input_padded = v1_input
+             # Recalculate difference and hadamard using adjusted shapes if necessary
+        elif padding_width_input > 0:
+            v1_input_padded = np.pad(v1_input, ((0, 0), (0, padding_width_input)), mode='constant')
+            v2_input_padded = v2_input # No padding needed for v2
+        else:
+            v1_input_padded = v1_input
+            v2_input_padded = v2_input
 
-        # Combine features exactly as in the formula
-        concat_input = tf.concat([tf_v1_input_padded, tf_v2_input], axis=1)                     # [v1; v2]
-        difference_input = tf.norm(tf_v1_input_padded - tf_v2_input, axis=1, keepdims=True)     # Euclidean distance [v1 - v2]
-        hadamard_product_input = tf_v1_input_padded * tf_v2_input                               # Element-wise product [v1 ⊙ v2]
+
+        # Calculate components for the input using padded versions
+        tf_v1_input_padded = tf.constant(v1_input_padded, dtype=tf.float32)
+        tf_v2_input_padded = tf.constant(v2_input_padded, dtype=tf.float32) # Gunakan v2 yang mungkin sudah dipad
+
+        concat_input = tf.concat([tf_v1_input_padded, tf_v2_input_padded], axis=1)
+        # Hitung difference dengan dimensi yang sudah disamakan
+        difference_input = tf.norm(tf_v1_input_padded - tf_v2_input_padded, axis=1, keepdims=True)
+        # Hitung hadamard product dengan dimensi yang sudah disamakan
+        hadamard_product_input = tf_v1_input_padded * tf_v2_input_padded
 
         # Stack input results horizontally
         result_input_tf = tf.concat([concat_input, difference_input, hadamard_product_input], axis=1)
@@ -304,75 +410,48 @@ def get_combined_recommendations(description, percentages):
         print(f"Input combined feature shape: {result_input.shape}")
         print(f"Dataset combined features shape: {combined_features_matrix.shape}")
 
+
         # --- Calculate Similarity ---
+        # Ensure shapes are compatible for cosine similarity
         if result_input.shape[1] != combined_features_matrix.shape[1]:
             print(f"Error: Shape mismatch between input features ({result_input.shape[1]}) and dataset features ({combined_features_matrix.shape[1]})")
             return pd.DataFrame()
 
-        # Normalize the input and dataset features before calculating similarity
-        input_norm = np.linalg.norm(result_input, axis=1, keepdims=True)
-        dataset_norm = np.linalg.norm(combined_features_matrix, axis=1, keepdims=True)
-        
-        # Avoid division by zero
-        input_norm = np.where(input_norm == 0, 1, input_norm)
-        dataset_norm = np.where(dataset_norm == 0, 1, dataset_norm)
-        
-        # Normalize the features
-        normalized_input = result_input / input_norm
-        normalized_dataset = combined_features_matrix / dataset_norm
-        
-        # Calculate cosine similarity
-        similarities = np.dot(normalized_dataset, normalized_input.T).flatten()
-        
-        # Ensure the input perfume gets 100% similarity when compared with itself
-        # Find the index of the input perfume in the dataset
-        input_perfume_index = None
-        for idx, row in df.iterrows():
-            if (row['Description'] == description and 
-                all(abs(row[feature] - percentages[i]) < 1e-6 for i, feature in enumerate(features))):
-                input_perfume_index = idx
-                break
-        
-        if input_perfume_index is not None:
-            similarities[input_perfume_index] = 1.0  # Set to 100% similarity
-
+        similarities = cosine_similarity(combined_features_matrix, result_input).flatten()
         print(f"Similarities calculated. Shape: {similarities.shape}")
         if similarities.size > 0:
-            print(f"Max Similarity: {np.max(similarities)}")
-            print(f"Min Similarity: {np.min(similarities)}")
+             print(f"Max Similarity: {np.max(similarities)}")
+             print(f"Min Similarity: {np.min(similarities)}")
+
 
         # --- Get Top Recommendations ---
+        # Ensure similarities array size matches DataFrame index
         if similarities.size != len(df):
-            print(f"Error: Number of similarities ({similarities.size}) does not match DataFrame length ({len(df)})")
-            return pd.DataFrame()
+             print(f"Error: Number of similarities ({similarities.size}) does not match DataFrame length ({len(df)})")
+             # This might happen if df was filtered after combined_features_matrix calculation
+             return pd.DataFrame()
 
-        top_indices = np.argsort(similarities)[::-1][:11]  # Get 11 recommendations
+        top_indices = np.argsort(similarities)[::-1][:10]
         print(f"Top Indices: {top_indices}")
 
         recommendations_df = df.iloc[top_indices].copy()
         recommendations_df['Combined_Similarity_Score'] = similarities[top_indices]
 
-        # Get top 10 recommendations
-        recommendations_df = recommendations_df.head(10)
-
-        # Tambahkan kolom Score dalam persentase
-        recommendations_df['Score'] = (recommendations_df['Combined_Similarity_Score'] * 100).round(2)
-
         # Ensure required columns are present
-        required_columns = ['Perfume_Name', 'Brand', 'URL', 'Image', 'Score', 'Combined_Similarity_Score', 'Gender', 'Description']
+        required_columns = ['Perfume_Name', 'Brand', 'URL', 'Image', 'Combined_Similarity_Score', 'Gender', 'Description']
         available_columns = [col for col in required_columns if col in recommendations_df.columns]
 
-        # Add missing columns with default values if needed
+        # Add missing columns with default values if needed (optional)
         for col in required_columns:
             if col not in recommendations_df.columns:
-                recommendations_df[col] = 'N/A'
+                recommendations_df[col] = 'N/A' # Or some other default
 
         return recommendations_df[available_columns]
 
     except Exception as e:
         print(f"An error occurred during recommendation generation: {e}")
         import traceback
-        traceback.print_exc()
+        traceback.print_exc() # Print detailed traceback for debugging
         return pd.DataFrame()
 
 # Fungsi convert_df_to_list

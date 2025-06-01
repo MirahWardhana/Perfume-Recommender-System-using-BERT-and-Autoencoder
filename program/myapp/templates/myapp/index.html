@@ -8,8 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fragrantica Recommendations</title>
   
-  <!-- <link rel="shortcut icon" type="image/x-icon" href="{% static 'myapp/assets/images/iconweb.png' %}"> -->
-  <link rel="SHORTCUT ICON" type="image/x-icon" href="{% static 'myapp/assets/images/iconweb.png' %}">
+  <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.png' %}">
 
   <!--
     - custom css link 
@@ -100,20 +99,20 @@
           <h1 class="main-heading">Discover Your Signature Scent</h1>
 
           <p class="home-text">
-            Looking for the perfect fragrance that speaks to your personality? With our Fragrance Recommendation System, you can effortlessly find the scent that matches your lifestyle, preferences, and mood. In just a few steps, we'll guide you to your new favorite fragrance, tailored uniquely to you.
+            Looking for the perfect fragrance that speaks to your personality? With our Fragrance Recommendation System, you can effortlessly find the scent that matches your lifestyle, preferences, and mood. In just a few steps, we’ll guide you to your new favorite fragrance, tailored uniquely to you.
           </p>
 
           <div class="btn-group">
 
-            <a href="#recommendation1" class="btn btn-primary btn-icon" style="text-decoration: none;">
+            <button class="btn btn-primary btn-icon">
               <img  src="{% static 'myapp/assets/images/menu.svg' %}" alt="menu icon">
               Find Recommendations
-            </a>
+            </button>
 
-            <a href="#about" class="btn btn-secondary btn-icon" style="text-decoration: none;">
+            <button class="btn btn-secondary btn-icon">
               <img  src="{% static 'myapp/assets/images/arrow.svg' %}" alt="menu icon">
               About us
-            </a>
+            </button>
 
           </div>
 
@@ -173,7 +172,7 @@
           <h2 class="section-title">How the recommendation system works</h2>
 
           <p class="section-text">
-            In the modern era, perfume is more than a fragrance—it's a means of expressing identity and personality. A chosen scent often reflects character, mood, or cultural values, becoming an essential part of daily life. Perfumes consist of three layers—top, middle, and base notes—that gradually unfold after application.
+            In the modern era, perfume is more than a fragrance—it’s a means of expressing identity and personality. A chosen scent often reflects character, mood, or cultural values, becoming an essential part of daily life. Perfumes consist of three layers—top, middle, and base notes—that gradually unfold after application.
 
           </p>
 
@@ -204,7 +203,7 @@
               <div class="container">
                 <h2 class="section-title" style="margin-bottom: 3vh;">Find Perfume Recommendation from Notes Selection and Description</h2>
                 
-              <p class="section-text" style="margin-bottom: 3vh;" >Input your preferred fragrance notes and a brief description of the scent you're looking for. Our system will analyze your input and generate perfume suggestions based on percentage note compositions.</p>
+              <p class="section-text" style="margin-bottom: 3vh;" >Input your preferred fragrance notes and a brief description of the scent you’re looking for. Our system will analyze your input and generate perfume suggestions based on percentage note compositions.</p>
                 <button class="btn btn-primary btn-icon" >
                   <a href="{% url 'feature1' %}" class="btn btn-primary btn-icon">
                     Show Recommendations
@@ -218,7 +217,7 @@
                 <h2 class="section-title" style="text-align: right; margin-bottom: 3vh;">Find Perfume Recommendation from Product Selection</h2>
               </div>
               <p class="section-text" style="text-align: right; margin-bottom: 3vh;" >Browse our collection of available perfumes, select a product that catches your interest, and let our platform recommend similar or complementary fragrances.</p>
-              <button class="btn btn-primary btn-icon" >
+              <button class="btn btn-primary btn-icon"> 
                 <a href="{% url 'feature2' %}" class="btn btn-primary btn-icon">
                   Show Recommendations
                 </a>

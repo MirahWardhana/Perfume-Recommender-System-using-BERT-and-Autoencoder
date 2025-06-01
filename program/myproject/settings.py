@@ -23,13 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*n4q+xmvb8c7=&g3$8eyw3chn0-%b4w-b0hzjhnwn#jk(lqib8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = [
-    'django-skripsi-mirah-14190666101.asia-southeast2.run.app',
-    'localhost',
-    '127.0.0.1'
-]
+ALLOWED_HOSTS = []
 
 
 # Application definition
