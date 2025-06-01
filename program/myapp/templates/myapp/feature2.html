@@ -160,7 +160,7 @@
                         <!-- Buttons -->
                         <div class="button-group text-center mb-2"> {# Centered buttons #}
                             <button id="getRecommendationsBtn" class="btn btn-dark shiny-button m-1" onclick="collectDataAndRecommend()" type="button" disabled>Get Recommendations</button> {# Disabled initially #}
-                    <a class="btn btn-outline-dark m-1 cancel-button" href="{% url 'index' %}">Back to Home</a>
+                    <a class="btn btn-outline-dark m-1 cancel-button" href="{% url 'index' %}">Back</a>
             </div>
         </div>
     </div>
@@ -569,8 +569,8 @@
             // Hide placeholder
             if (placeholder) placeholder.style.display = 'none';
 
-            // Get top 10 recommendations starting from index 1 (second item)
-            const topRecommendations = recommendations.slice(1, 11);
+            // Get top 10 recommendations starting from index 0 (first item)
+            const topRecommendations = recommendations.slice(0, 10);
 
             // Render each recommendation using the same flip-card markup as feature1
             topRecommendations.forEach(rec => {
@@ -712,9 +712,6 @@
              margin-bottom: 0.15rem; /* Make title margin smaller too */
         }
 
-    </style>
-
-    <style>
         /* Responsive: Card input produk dan hasil rekomendasi lebih panjang di mobile */
         @media (max-width: 576px) {
             #scroll-style .card-wrapper,
@@ -734,6 +731,15 @@
             #recommendationsGrid .card-body {
                 padding: 0.5rem 0.25rem;
             }
+        }
+
+        /* Hide horizontal scrollbar in recommendation result */
+        #targetDiv,
+        #recommendationsGrid,
+        .result-grid,
+        .result-section {
+            overflow-x: hidden !important;
+            overflow-y: auto;
         }
     </style>
 
