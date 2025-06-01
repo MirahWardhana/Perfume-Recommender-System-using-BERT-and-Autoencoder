@@ -371,9 +371,12 @@
                                         value="${initialSliderValue}"
                                         class="form-range custom-slider"
                                         id="${sliderId}"
+                                        name="${noteName}"
                                         data-note-name="${noteName}"
-                                        oninput="updateSliderValue(this, '${percentageId}')">
-                                    <span id="${percentageId}" class="slider-percentage">${percentageValue.toFixed(1)}%</span>
+                                        data-initial-value="${initialSliderValue}"
+                                        oninput="updateSliderValue(this, '${percentageId}')"
+                                        onchange="updateSliderValue(this, '${percentageId}')">
+                                    <span id="${percentageId}" class="slider-percentage">${initialSliderValue}%</span>
                                 </td>
                             </tr>
                         `;
@@ -384,30 +387,26 @@
 
                 // 2. Set the innerHTML once
                 if (displayedNotesCount > 0) {
-                     notesTableBody.innerHTML = tableBodyHtml;
-                     console.log(`Set innerHTML for ${displayedNotesCount} sliders.`);
+                    notesTableBody.innerHTML = tableBodyHtml;
+                    console.log(`Set innerHTML for ${displayedNotesCount} sliders.`);
+                    
+                    // Initialize all sliders after DOM update
+                    setTimeout(() => {
+                        slidersToUpdate.forEach(ids => {
+                            const sliderElement = document.getElementById(ids.sliderId);
+                            if (sliderElement) {
+                                const initialValue = sliderElement.getAttribute('data-initial-value');
+                                if (initialValue) {
+                                    sliderElement.value = initialValue;
+                                    updateSliderValue(sliderElement, ids.percentageId);
+                                }
+                            }
+                        });
+                    }, 0);
                 } else {
                     console.log("No significant notes found, adding placeholder.");
                     notesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted" id="notesPlaceholder">No significant notes data found for this perfume.</td></tr>';
                 }
-
-
-                // 3. Update Styles After Setting InnerHTML (allowing DOM to potentially update)
-                // Use a minimal timeout to ensure DOM has likely updated
-                setTimeout(() => {
-                    console.log(`Attempting to update styles for ${slidersToUpdate.length} sliders after timeout.`);
-                    slidersToUpdate.forEach(ids => {
-                        const sliderElement = document.getElementById(ids.sliderId);
-                        if (sliderElement) {
-                            updateSliderValue(sliderElement, ids.percentageId); // Apply initial color/text
-                        } else {
-                            // This log is crucial!
-                            console.error(`Could not find slider ${ids.sliderId} after setting innerHTML and timeout.`);
-                        }
-                    });
-                     console.log("Finished updating slider styles after timeout.");
-                }, 0); // 0ms timeout often yields to the browser's rendering cycle
-
 
             } else {
                 console.log("No numeric data available, adding placeholder.");
@@ -450,14 +449,20 @@
         function updateSliderValue(slider, percentageId) {
             const percentageSpan = document.getElementById(percentageId);
             if (slider && percentageSpan) {
-                const value = slider.value;
+                const value = parseFloat(slider.value);
                 const color = makeColor(value); // Calculate color based on slider value (0-100)
 
                 // Update display text
-                percentageSpan.textContent = value + '%';
+                percentageSpan.textContent = value.toFixed(1) + '%';
 
                 // Update slider background color gradient
                 slider.style.background = `linear-gradient(to right, ${color} ${value}%, #ddd ${value}%)`;
+                
+                // Store the current value in a data attribute for easy access
+                slider.setAttribute('data-current-value', value);
+                
+                // Log the update for debugging
+                console.log(`Updated slider ${slider.getAttribute('name')}: ${value}%`);
             }
         }
         // --- End Modified updateSliderValue ---
@@ -488,71 +493,70 @@
             // 1. Get Description from the currently loaded perfume
             const description = currentPerfumeData.input.Description || '';
 
-            // 2. Get Percentages from the *current* slider values, converting back to 0-1 range
+            // 2. Get Percentages from the *current* slider values
             const percentages = {};
             const notesTableBody = document.getElementById('notesTableBody');
             const sliders = notesTableBody.querySelectorAll('input[type="range"]');
 
-            // Populate percentages from visible sliders
-            sliders.forEach(slider => {
-                 const noteName = slider.getAttribute('data-note-name'); // Get name from data attribute
-                 if (noteName) {
-                     // Divide slider value by 100 to convert back to 0-1 range for backend
-                    percentages[noteName] = parseInt(slider.value, 10) / 100.0;
-                 }
+            console.log("Found sliders:", sliders.length);
+
+            // First, initialize all notes with 0
+            ALL_NOTE_NAMES.forEach(noteName => {
+                percentages[noteName] = 0.0;
             });
 
-            // Add all other possible notes (from ALL_NOTE_NAMES) with a value of 0
-            // if they weren't already included by a slider.
-            ALL_NOTE_NAMES.forEach(noteName => {
-                 if (!(noteName in percentages)) {
-                     percentages[noteName] = 0.0; // Send 0.0 for notes not present
-                 }
-             });
+            // Then update with actual slider values
+            sliders.forEach(slider => {
+                const noteName = slider.getAttribute('name');
+                if (noteName) {
+                    const sliderValue = parseFloat(slider.value);
+                    console.log(`Slider ${noteName}: ${sliderValue}%`);
+                    // Convert from 0-100 to 0-1 range
+                    percentages[noteName] = sliderValue / 100.0;
+                }
+            });
 
-             console.log("--- Sending data from Feature 2 ---");
-             console.log("Sending Description:", description);
-             console.log("Sending Percentages (0-1 range):", percentages);
+            console.log("Final percentages:", percentages);
 
-            // 3. Send data to recommendation endpoint (feature1 URL)
-             fetch("{% url 'feature1' %}", { // Use feature1 endpoint for combined recommendations
-                 method: 'POST',
-                 headers: {
-                     'Content-Type': 'application/json',
-                     'X-CSRFToken': getCsrfToken(),
-                     'X-Requested-With': 'XMLHttpRequest'
-                 },
-                 body: JSON.stringify({
-                     description: description,
-                     percentages: percentages // Send the dictionary with values in 0-1 range
-                 })
-             })
-             .then(response => {
-                 if (!response.ok) {
-                     return response.json().then(err => { throw new Error(err.message || 'Recommendation request failed'); });
-                 }
-                 return response.json();
-             })
-             .then(data => {
-                 console.log("Recommendations received:", data);
-                 displayRecommendations(data.recommendations || []); // Pass empty array if undefined
-                 scrollToTarget(); // Scroll after displaying
-             })
-             .catch(error => {
-                 console.error('Error getting recommendations:', error);
-                 alert('Error getting recommendations: ' + error.message);
-                 displayRecommendations([]); // Clear grid on error
-             })
-             .finally(() => {
-                 // Re-enable button and reset text
-                 if (getRecBtn) {
-                     getRecBtn.disabled = false;
-                     getRecBtn.textContent = 'Get Recommendations';
-                 }
-             });
-         }
+            // 3. Send data to recommendation endpoint
+            fetch("{% url 'feature1' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    description: description,
+                    percentages: percentages
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || 'Recommendation request failed'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Recommendations received:", data);
+                displayRecommendations(data.recommendations || []); // Pass empty array if undefined
+                scrollToTarget(); // Scroll after displaying
+            })
+            .catch(error => {
+                console.error('Error getting recommendations:', error);
+                alert('Error getting recommendations: ' + error.message);
+                displayRecommendations([]); // Clear grid on error
+            })
+            .finally(() => {
+                // Re-enable button and reset text
+                if (getRecBtn) {
+                    getRecBtn.disabled = false;
+                    getRecBtn.textContent = 'Get Recommendations';
+                }
+            });
+        }
 
-         function displayRecommendations(recommendations) {
+        function displayRecommendations(recommendations) {
             const grid = document.getElementById('recommendationsGrid');
             const placeholder = document.getElementById('recommendationsPlaceholder');
             // Clear previous cards

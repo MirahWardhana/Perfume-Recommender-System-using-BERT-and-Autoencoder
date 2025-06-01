@@ -34,7 +34,7 @@ def feature1(request):
                 percentages_input = data.get('percentages', {})
                 if not isinstance(percentages_input, dict):
                      return JsonResponse({'status': 'error', 'message': 'Invalid percentages format.'}, status=400)
-                percentages_dict = {k: v for k, v in percentages_input.items() if isinstance(v, (int, float))}
+                percentages_dict = {k: float(v) for k, v in percentages_input.items() if isinstance(v, (int, float))}
 
             else:
                 description = request.POST.get('description', '')
@@ -42,15 +42,15 @@ def feature1(request):
                     note_name = note_item['Notes']
                     percentage_val_str = request.POST.get(note_name)
                     try:
-                        percentages_dict[note_name] = int(percentage_val_str) if percentage_val_str else 0
+                        percentages_dict[note_name] = float(percentage_val_str) if percentage_val_str else 0.0
                     except (ValueError, TypeError):
-                        percentages_dict[note_name] = 0
+                        percentages_dict[note_name] = 0.0
 
             ordered_percentages = []
             if features:
                 num_expected_features = len(features)
                 for feature_name in features:
-                    percentage_value = percentages_dict.get(feature_name, 0)
+                    percentage_value = min(1.0, max(0.0, float(percentages_dict.get(feature_name, 0.0))))
                     ordered_percentages.append(percentage_value)
 
             else:
