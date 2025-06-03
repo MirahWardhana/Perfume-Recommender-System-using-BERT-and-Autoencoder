@@ -47,12 +47,12 @@
                                     type="range"
                                     min="0"
                                     max="100"
-                                    value="{% if input_percentages and note_item.Notes in input_percentages %}{{ input_percentages|get_item:note_item.Notes }}{% else %}0{% endif %}"
+                                    value="{% if input_percentages and note_item.Notes|title in input_percentages %}{{ input_percentages|get_item:note_item.Notes|title }}{% else %}0{% endif %}"
                                     class="form-range custom-slider"
                                     id="slider{{ forloop.counter }}"
                                     oninput="updateSliderDisplay({{ forloop.counter }})">
                                 <span id="sliderPercentage{{ forloop.counter }}" class="slider-percentage">
-                                    {% if input_percentages and note_item.Notes in input_percentages %}{{ input_percentages|get_item:note_item.Notes }}{% else %}0{% endif %}%
+                                    {% if input_percentages and note_item.Notes|title in input_percentages %}{{ input_percentages|get_item:note_item.Notes|title }}{% else %}0{% endif %}%
                                 </span>
                             </td>
                         </tr>
@@ -114,7 +114,7 @@
                                         <p class="card-text">{{ r.Brand }}</p>
                                         <p class="card-text">{{ r.Gender }}</p>
                                         <p class="card-text score-text" style="font-size: 0.5rem;">
-                                            Score: {{ r.Combined_Similarity_Score|floatformat:3 }}%
+                                            Score: {{ r.Combined_Similarity_Score|floatformat:2 }}%
                                         </p>
                                     </div>
                                 </div>
@@ -251,7 +251,14 @@
             #targetDiv .result-grid .card-body {
                 padding: 0.5rem 0.25rem;
             }
+
+            /* Make the result section taller on mobile */
+            #targetDiv.result-section {
+                max-height: 500px; /* Adjust this value as needed */
+                overflow-y: auto;
+            }
         }
+        
     </style>
 
   </body>

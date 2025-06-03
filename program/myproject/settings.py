@@ -25,7 +25,17 @@ SECRET_KEY = 'django-insecure-*n4q+xmvb8c7=&g3$8eyw3chn0-%b4w-b0hzjhnwn#jk(lqib8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'django-skripsi-mirah-14190666101.asia-southeast2.run.app',
+    'localhost', 
+    '127.0.0.1'
+]
+
+
+# Add trusted origins for CSRF protection
+CSRF_TRUSTED_ORIGINS = [
+    'https://django-skripsi-mirah-14190666101.asia-southeast2.run.app',
+]
 
 
 # Application definition

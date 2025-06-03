@@ -1,4 +1,4 @@
-<!-- {% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <title>Customize Perfume Selection</title>
-    <link rel="shortcut icon" type="x-icon" href="{% static 'myapp/assets/images/iconweb.png' %}">
+    
 
     <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{% static 'myapp/assets/css/feature.css' %}">
@@ -174,7 +174,7 @@
             <div class="col-12 text-center"><h2>Recommendation Result</h2></div>
         </div>
         <div class="row justify-content-center">
-            <div class="col-lg-10 col-md-12">
+            <div class="col-lg-9 col-md-12">
                 <div class="result-grid mb-4">
                     <!-- Placeholder and recommendations grid -->
                     <p id="recommendationsPlaceholder" class="text-center text-muted mt-5">
@@ -569,17 +569,12 @@
                 }
                 return;
             }
-
             // Hide placeholder
             if (placeholder) placeholder.style.display = 'none';
-
-            // Get top 10 recommendations starting from index 0 (first item)
-            const topRecommendations = recommendations.slice(0, 10);
-
             // Render each recommendation using the same flip-card markup as feature1
-            topRecommendations.forEach(rec => {
+            recommendations.forEach(rec => {
                 // Format the score
-                const score = rec.Combined_Similarity_Score ? (parseFloat(rec.Combined_Similarity_Score) * 100).toFixed(1) : 'N/A';
+                const score = rec.Combined_Similarity_Score ? (parseFloat(rec.Combined_Similarity_Score) * 100).toFixed(2) : 'N/A'; // Multiply by 100 and format
 
                 const cardHtml = `
                     <div class="card mt-1 mb-1 ml-1 mx-1 flip-card card-wrapper" onclick="this.classList.toggle('flipped')">
@@ -591,6 +586,7 @@
                                     <h5 class="card-title">${rec.Perfume_Name}</h5>
                                     <p class="card-text">${rec.Brand}</p>
                                     <p class="card-text">${rec.Gender}</p>
+                                    {# Add Similarity Score #}
                                     <p class="card-text score-text">
                                         Score: ${score}%
                                     </p>
@@ -660,6 +656,43 @@
         }
         /* --- End Pagination Customization --- */
 
+        /* Hide horizontal scrollbar in recommendation result */
+        #recommendationsGrid {
+            overflow-x: hidden !important;
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+        .result-section {
+            overflow-x: hidden !important;
+            max-width: 100% !important;
+            width: 80% !important;
+        }
+        .result-grid {
+            overflow-x: hidden !important;
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+
+        /* Recommendation Grid Layout */
+        #recommendationsGrid .grid-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            #recommendationsGrid .grid-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Mobile Card Height Adjustment */
+        @media (max-width: 768px) {
+            .card-wrapper {
+                min-height: 300px !important;
+            }
+        }
 
         /* Basic styles for recommendation card back */
         .recommendation-card .flip-card-back {
@@ -716,36 +749,7 @@
              margin-bottom: 0.15rem; /* Make title margin smaller too */
         }
 
-        /* Responsive: Card input produk dan hasil rekomendasi lebih panjang di mobile */
-        @media (max-width: 576px) {
-            #scroll-style .card-wrapper,
-            #scroll-style .flip-card-front,
-            #recommendationsGrid .card-wrapper,
-            #recommendationsGrid .flip-card-front {
-                min-height: 220px;
-                height: 220px;
-                max-width: 95vw;
-            }
-            #scroll-style .card-img-top,
-            #recommendationsGrid .card-img-top {
-                max-height: 110px;
-                object-fit: contain;
-            }
-            #scroll-style .card-body,
-            #recommendationsGrid .card-body {
-                padding: 0.5rem 0.25rem;
-            }
-        }
-
-        /* Hide horizontal scrollbar in recommendation result */
-        #targetDiv,
-        #recommendationsGrid,
-        .result-grid,
-        .result-section {
-            overflow-x: hidden !important;
-            overflow-y: auto;
-        }
     </style>
 
   </body>
-</html> -->
+</html>
