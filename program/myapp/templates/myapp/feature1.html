@@ -91,15 +91,15 @@
     
     </form>
 
+    <!-- Result Section -->
+    <!-- Bagian Judul -->
+    <div class="row" style="margin-top: 1rem;" >
+        <div class="col-12 text-center"><h2>Recommendation Result</h2></div>
+    </div>
     <!-- Hasil -->
     <div id="targetDiv" class="result-section">
-        <!-- Bagian Judul -->
-        <div class="col-12">
-            <h2 class="mb-3">Recommendation Result</h2>
-        </div>
-
         <!-- Bagian Grid -->
-        <div class="container mt-4 mb-4 result-grid" id="scroll-style-results">
+        <div class="container mb-4 result-grid" id="scroll-style-results">
             <div class="row g-0 grid-row justify-content-center">
                 {% if recommendations %}
                     {% for r in recommendations %}

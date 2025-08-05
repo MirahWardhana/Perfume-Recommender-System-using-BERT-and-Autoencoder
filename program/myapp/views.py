@@ -41,9 +41,7 @@ def feature1(request):
                 percentages_input = data.get('percentages', {})
                 if not isinstance(percentages_input, dict):
                      return JsonResponse({'status': 'error', 'message': 'Invalid percentages format.'}, status=400)
-<<<<<<< Updated upstream
-                percentages_dict = {k: float(v) for k, v in percentages_input.items() if isinstance(v, (int, float))}
-=======
+                
                 # Normalize the keys in percentages_input
                 percentages_dict = {k.replace("_", " ").title(): v for k, v in percentages_input.items() if isinstance(v, (int, float))}
 
@@ -51,7 +49,6 @@ def feature1(request):
                 print("--- FEATURE2 → FEATURE1 AJAX Received ---")
                 print(f"Description: {description}")
                 print(f"Selected Percentages: {percentages_dict}")
->>>>>>> Stashed changes
 
             else:
                 description = request.POST.get('description', '')
@@ -59,27 +56,17 @@ def feature1(request):
                     note_name = note_item['Notes']
                     percentage_val_str = request.POST.get(note_name)
                     try:
-<<<<<<< Updated upstream
-                        percentages_dict[note_name] = float(percentage_val_str) if percentage_val_str else 0.0
-                    except (ValueError, TypeError):
-                        percentages_dict[note_name] = 0.0
-=======
                         percentages_dict[note_name.replace("_", " ").title()] = int(percentage_val_str) if percentage_val_str else 0
                     except (ValueError, TypeError):
                         percentages_dict[note_name.replace("_", " ").title()] = 0
->>>>>>> Stashed changes
 
             ordered_percentages = []
             if features:
                 num_expected_features = len(features)
                 print(f"Expected features order (models.py): {features}")
                 for feature_name in features:
-<<<<<<< Updated upstream
-                    percentage_value = min(1.0, max(0.0, float(percentages_dict.get(feature_name, 0.0))))
-=======
                     normalized_feature_name = feature_name.replace("_", " ").title()
                     percentage_value = percentages_dict.get(normalized_feature_name, 0)
->>>>>>> Stashed changes
                     ordered_percentages.append(percentage_value)
 
                 print(f"Input Percentages Dict (from request): {percentages_dict}")

@@ -168,11 +168,12 @@
         </div> <!-- End Insight Section (Right Column) -->
     </div> <!-- End Main Row -->
 
-        <!-- Result Section -->
-    <div id="targetDiv" class="result-section container mt-5">
-        <div class="row">
-            <div class="col-12 text-center"><h2>Recommendation Result</h2></div>
-        </div>
+    <!-- Result Section -->
+     <!-- Bagian Judul -->
+    <div class="row" style="margin-top: 4rem;" >
+        <div class="col-12 text-center"><h2>Recommendation Result</h2></div>
+    </div>
+    <div id="targetDiv" class="result-section container">
         <div class="row justify-content-center">
             <div class="col-lg-9 col-md-12">
                 <div class="result-grid mb-4">
@@ -572,7 +573,7 @@
             // Hide placeholder
             if (placeholder) placeholder.style.display = 'none';
             // Render each recommendation using the same flip-card markup as feature1
-            recommendations.forEach(rec => {
+            recommendations.forEach((rec, index) => {
                 // Format the score
                 const score = rec.Combined_Similarity_Score ? (parseFloat(rec.Combined_Similarity_Score) * 100).toFixed(2) : 'N/A'; // Multiply by 100 and format
 
@@ -665,12 +666,14 @@
         .result-section {
             overflow-x: hidden !important;
             max-width: 100% !important;
-            width: 80% !important;
+            width: 90% !important;
+            
         }
         .result-grid {
             overflow-x: hidden !important;
             max-width: 100% !important;
             width: 100% !important;
+            
         }
 
         /* Recommendation Grid Layout */
@@ -679,6 +682,7 @@
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
             padding: 1rem;
+            
         }
 
         @media (max-width: 768px) {
@@ -738,6 +742,18 @@
              border-radius: 4px;
              border: 1px solid #dee2e6;
          }
+
+        /* Style for first recommendation card */
+        #recommendationsGrid .card-wrapper:first-child {
+            background-color: #e9ecef;
+            border: 2px solid #6c757d;
+        }
+        #recommendationsGrid .card-wrapper:first-child .flip-card-front {
+            background-color: #e9ecef;
+        }
+        #recommendationsGrid .card-wrapper:first-child .flip-card-back {
+            background-color: #e9ecef;
+        }
 
         /* --- Further Reduce Vertical Spacing in Rec Cards --- */
         #recommendationsGrid .card-body .card-text {
